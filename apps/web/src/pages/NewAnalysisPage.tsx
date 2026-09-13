@@ -1,5 +1,5 @@
 import { ArticleFetch } from '@/components/articles/ArticleFetch';
-import { TopicPicker } from '@/components/articles/TopicPicker';
+import { ExampleTopic } from '@/components/articles/ExampleTopic';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,21 +35,20 @@ export function NewAnalysisPage() {
           <Field key={topic.title}>
             <ArticleFetch
               label="Your article"
-              example={topic.article}
-              exampleAction={<TopicPicker topics={topics} topic={topic} disabled={isSubmitting} onSelect={selectTopic} />}
               url={articleUrl}
               onUrlChange={setArticleUrl}
               article={article}
               disabled={isSubmitting}
               onChange={selectArticle}
-            />
+            >
+              <ExampleTopic topics={topics} topic={topic} disabled={isSubmitting} onSelect={selectTopic} />
+            </ArticleFetch>
             <FieldError errors={[errors.articleId]} />
           </Field>
-          {features.recommendations && topic.competitors.map((example, index) => <Field key={`${topic.title}-${index}`}>
+          {features.recommendations && competitorUrls.map((url, index) => <Field key={`${topic.title}-${index}`}>
             <ArticleFetch
               label={`Competitor ${index + 1} (optional)`}
-              example={example}
-              url={competitorUrls[index]!}
+              url={url}
               onUrlChange={url => changeCompetitorUrl(index, url)}
               article={competitors[index]}
               disabled={isSubmitting}

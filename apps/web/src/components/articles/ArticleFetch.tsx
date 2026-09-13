@@ -9,8 +9,7 @@ import { useArticleImport } from '@/hooks/useArticleImport';
 
 type Props = {
   label: string;
-  example: { site: string; url: string };
-  exampleAction?: ReactNode;
+  children?: ReactNode;
   url: string;
   onUrlChange: (url: string) => void;
   article: Article | undefined;
@@ -18,7 +17,7 @@ type Props = {
   onChange: (article: Article | undefined) => void;
 };
 
-export function ArticleFetch({ label, example, exampleAction, url, onUrlChange, article, disabled, onChange }: Props) {
+export function ArticleFetch({ label, children, url, onUrlChange, article, disabled, onChange }: Props) {
   const id = useId();
   const { pending, error, canFetch, changeUrl, fetchArticle } = useArticleImport({ url, onUrlChange, article, onChange });
 
@@ -28,13 +27,7 @@ export function ArticleFetch({ label, example, exampleAction, url, onUrlChange, 
       <Input id={id} type="url" placeholder="https://" value={url} disabled={disabled || pending} onChange={event => changeUrl(event.target.value)} />
       <Button type="button" disabled={disabled || !canFetch} onClick={fetchArticle}>{pending ? 'Fetching…' : 'Fetch'}</Button>
     </div>
-    <p className="flex items-center gap-1 text-xs text-muted-foreground">
-      Example:
-      <Button type="button" variant="link" size="xs" title={example.url} disabled={disabled || pending} onClick={() => changeUrl(example.url)}>
-        {example.site}
-      </Button>
-      {exampleAction}
-    </p>
+    {children}
     {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
     {article && <FetchedArticle article={article} />}
   </div>;
