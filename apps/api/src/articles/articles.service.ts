@@ -1,9 +1,9 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { Article, ArticleSection } from '@semantic/contracts';
 import { WebPageService } from '../web-page/web-page.service.js';
-import { importFailed } from './article-import-failed.js';
+import { importFailed } from './lib/article-import-failed.js';
 import { ArticlesRepository } from './articles.repository.js';
-import { extractArticle } from './html-sections.js';
+import { extractArticle } from './lib/html-sections.js';
 
 const MIN_TEXT_LENGTH = 500;
 

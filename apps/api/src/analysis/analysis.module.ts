@@ -3,7 +3,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { ArticlesModule } from '../articles/articles.module.js';
 import { OllamaModule } from '../ollama/ollama.module.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
-import { ANALYSIS_QUEUE } from './analysis-queue.js';
+import { ANALYSIS_QUEUE } from './lib/analysis-queue.js';
 import { AnalysisRunsRepository } from './analysis-runs.repository.js';
 import { AnalysisController } from './analysis.controller.js';
 import { AnalysisProcessor } from './analysis.processor.js';

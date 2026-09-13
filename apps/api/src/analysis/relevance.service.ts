@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { OllamaService } from '../ollama/ollama.service.js';
-import { cosineSimilarity } from './cosine-similarity.js';
+import { cosineSimilarity } from './lib/cosine-similarity.js';
 
 @Injectable()
 export class RelevanceService {

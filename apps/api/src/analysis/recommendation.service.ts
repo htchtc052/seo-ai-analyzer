@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { recommendationSchema, type Recommendation } from '@semantic/contracts';
 import type { AppConfig } from '../config/config.schema.js';
 import { OllamaService } from '../ollama/ollama.service.js';
-import { buildRecommendationPrompt, type RecommendationPromptInput } from './recommendation-prompt.js';
+import { buildRecommendationPrompt, type RecommendationPromptInput } from './lib/recommendation-prompt.js';
 
 @Injectable()
 export class RecommendationService {

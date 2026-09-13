@@ -11,9 +11,9 @@ import type {
   RecommendationJob,
 } from '@semantic/contracts';
 import { ArticlesService } from '../articles/articles.service.js';
-import { ANALYSIS_QUEUE, type AnalysisJob } from './analysis-queue.js';
+import { ANALYSIS_QUEUE, type AnalysisJob } from './lib/analysis-queue.js';
 import { AnalysisRunsRepository } from './analysis-runs.repository.js';
-import { flattenFragments } from './fragments.js';
+import { flattenFragments } from './lib/fragments.js';
 import { RecommendationService } from './recommendation.service.js';
 import { RelevanceService } from './relevance.service.js';
 
