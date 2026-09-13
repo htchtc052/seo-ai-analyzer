@@ -4,7 +4,7 @@
 
 ## Решение
 
-- Один репозиторий и один набор GitHub Actions. Publish images на push в main гоняет typecheck, миграции и тесты на Postgres и Redis, затем матрицей собирает два образа в GHCR: api (NestJS, Prisma Client и Prisma CLI) и web (статика Vite в nginx). Deploy запускается вручную и по SSH выкатывает оба.
+- Один репозиторий и один набор GitHub Actions. Publish images на push в main гоняет typecheck, миграции и тесты на Postgres и Redis, затем матрицей собирает два образа в GHCR: api (NestJS, Prisma Client и Prisma CLI) и web (статика Vite в nginx). Деплой — скрипт infra/deploy.sh, который запускается вручную по SSH; SSH-ключей и секретов в GitHub нет.
 - VPS ничего не собирает и не хранит исходники: в нём sparse checkout папки infra, .env и Docker volumes. Traefik выпускает сертификат Let's Encrypt и маршрутизирует /api в API, остальное — в web, поэтому фронтенд и API на одном домене.
 - Миграции применяет `prisma migrate deploy` во временном контейнере из образа api до пересоздания сервисов — той же версией Prisma, что и приложение; если миграция падает, работающие контейнеры остаются.
 - Ollama установлена на хосте VPS, API обращается к ней через host.docker.internal. Compose описывает только то, что относится к приложению, и не меняется при переходе на LLM провайдера.

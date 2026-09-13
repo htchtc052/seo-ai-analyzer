@@ -60,7 +60,7 @@ npm run smoke:import -w @semantic/api
 
 ## Деплой
 
-Push в `main` проверяет код и публикует образы `api` и `web` в GHCR (`.github/workflows/publish.yml`), выкатка на VPS — ручной workflow Deploy. Dockerfile лежат в `apps/<app>/.docker/`, прод-compose с Traefik — в `infra/`. Порядок настройки сервера и обновления — [`infra/DEPLOY.md`](infra/DEPLOY.md).
+Push в `main` проверяет код и публикует образы `api` и `web` в GHCR (`.github/workflows/publish.yml`), выкатка на VPS — `infra/deploy.sh`, запускаемый вручную по SSH. Dockerfile лежат в `apps/<app>/.docker/`, прод-compose с Traefik — в `infra/`. Порядок настройки сервера и обновления — [`infra/DEPLOY.md`](infra/DEPLOY.md).
 
 Прод-образы можно собрать локально:
 

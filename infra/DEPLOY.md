@@ -5,7 +5,7 @@
 Прод — один заменяемый VPS на Ubuntu с адресом `seo-analyzer.proclouds.ru`.
 
 - Push в `main` запускает workflow **Publish images**: typecheck, миграции и тесты на Postgres и Redis в Actions, затем сборка образов `ghcr.io/htchtc052/seo-ai-analyzer-api:latest` (NestJS и Prisma CLI для миграций) и `ghcr.io/htchtc052/seo-ai-analyzer-web:latest` (статика в nginx). Публикация ничего не выкатывает.
-- Деплой — ручной workflow **Deploy**: по SSH скачивает образы, применяет миграции временным контейнером из образа api, пересоздаёт контейнеры и проверяет `https://<APP_DOMAIN>/api/health`. Если миграция упала, работающие контейнеры не заменяются.
+- Деплой — `infra/deploy.sh`, запускается вручную по SSH: скачивает образы, применяет миграции временным контейнером из образа api, пересоздаёт контейнеры и проверяет `https://<APP_DOMAIN>/api/health`. Если миграция упала, работающие контейнеры не заменяются. Ключей и секретов в GitHub нет.
 - VPS ничего не собирает. На нём только папка `infra` этого репозитория (sparse checkout), `.env` и Docker volumes.
 - Traefik выпускает сертификат Let's Encrypt, отправляет `/api` в контейнер API, остальное — в nginx со статикой web.
 - Ollama работает на хосте VPS, API ходит к ней через `host.docker.internal`. Оценки требуют embedding-модель; рекомендации включаются, только если в `.env` задан `OLLAMA_CHAT_MODEL` и модель скачана.
@@ -61,37 +61,26 @@ cp .env.example .env && chmod 600 .env
 - `ACME_EMAIL` — реальный ящик, сюда Let's Encrypt пишет об истечении сертификата;
 - `POSTGRES_PASSWORD`, `REDIS_PASSWORD` — `openssl rand -hex 24`. Пароли подставляются в URL подключения, поэтому только hex.
 
-Публичный ключ, парный секрету `VPS_SSH_KEY`, должен лежать в `/root/.ssh/authorized_keys`.
-
-Первый запуск — workflow **Deploy** или те же команды вручную:
+Первый запуск:
 
 ```bash
-cd /srv/seo-ai-analyzer/infra
-docker compose pull api web
-docker compose up -d --wait postgres redis
-docker compose run --rm api npx --no-install prisma migrate deploy
-docker compose up -d
-curl --fail https://seo-analyzer.proclouds.ru/api/health
+/srv/seo-ai-analyzer/infra/deploy.sh
 ```
 
 ## GitHub
-
-Секреты репозитория `htchtc052/seo-ai-analyzer` для **Deploy**:
-
-- `VPS_HOST` — текущий публичный IP сервера; меняется при переезде;
-- `VPS_SSH_KEY` — приватный ключ, которым можно войти как `root`.
 
 GHCR создаёт пакеты приватными. После первой публикации откройте каждый пакет (Packages → `seo-ai-analyzer-api`, `seo-ai-analyzer-web` → Package settings) и сделайте его публичным: тогда VPS скачивает образы без логина и токенов на сервере.
 
 ## Обновление
 
 1. Push в `main`, дождаться зелёного **Publish images**.
-2. Actions → **Deploy** → Run workflow, или из терминала:
+2. С машины, у которой есть SSH-доступ к серверу:
 
 ```bash
-gh workflow run deploy.yml --repo htchtc052/seo-ai-analyzer --ref main
-gh run watch --repo htchtc052/seo-ai-analyzer
+ssh root@<VPS_HOST> 'cd /srv/seo-ai-analyzer && git pull --ff-only && infra/deploy.sh'
 ```
+
+`git pull` идёт до запуска скрипта, поэтому выполняется уже обновлённый `deploy.sh`.
 
 Новая переменная в `.env.example` сама на сервер не попадает — её нужно дописать в `/srv/seo-ai-analyzer/infra/.env`.
 
