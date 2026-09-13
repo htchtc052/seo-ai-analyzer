@@ -27,7 +27,7 @@ curl -fsSL https://get.docker.com | sh
 
 Docker Hub отдаёт `429` анонимным клиентам с адресов Timeweb. Если `docker compose pull` упирается в лимит, пропишите зеркало `https://dockerhub.timeweb.cloud` в `/etc/docker/daemon.json` и перезапустите Docker.
 
-Ollama на хосте. Она должна слушать не только loopback, иначе контейнер до неё не достучится; снаружи порт закрывает файрвол. Скачивается только embedding-модель:
+Ollama на хосте. Она должна слушать не только loopback, иначе контейнер до неё не достучится. Скачивается только embedding-модель:
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
@@ -44,15 +44,6 @@ Swap страхует embedding-модель и Node от OOM на малень�
 ```bash
 fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
 echo '/swapfile none swap sw 0 0' >> /etc/fstab
-```
-
-Файрвол: наружу только SSH, 80 и 443; Ollama доступна только из Docker-сетей.
-
-```bash
-ufw allow OpenSSH
-ufw allow 80,443/tcp
-ufw allow from 172.16.0.0/12 to any port 11434 proto tcp
-ufw enable
 ```
 
 Инфраструктура и секреты:
