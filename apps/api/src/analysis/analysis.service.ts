@@ -82,6 +82,12 @@ export class AnalysisService {
     return runs.map(toSummary);
   }
 
+  async delete(id: string): Promise<void> {
+    await this.requireRun(id);
+    await this.queue.remove(id);
+    await this.runs.delete(id);
+  }
+
   async writeRecommendations(runId: string): Promise<void> {
     const run = await this.requireRun(runId);
     const recommendation = await this.recommendations.recommend({

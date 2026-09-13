@@ -9,7 +9,7 @@ import {
 
 async function request(path: string, options?: RequestInit) {
   const response = await fetch(`/api${path}`, options);
-  const body: unknown = await response.json();
+  const body: unknown = response.status === 204 ? undefined : await response.json();
   if (!response.ok) {
     const parsed = apiErrorSchema.safeParse(body);
     throw new Error(parsed.success ? parsed.data.error.message : `Request failed (${response.status})`);
@@ -43,4 +43,8 @@ export async function getAnalysisRuns(signal?: AbortSignal) {
 
 export async function getFeatures(signal?: AbortSignal) {
   return featuresResponseSchema.parse(await request('/analyses/features', { signal })).features;
+}
+
+export async function deleteAnalysisRun(id: string) {
+  await request(`/analyses/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }

@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { DeleteRunButton } from '@/components/analysis/DeleteRunButton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +13,7 @@ const resultLabels: Record<AnalysisRunResult, string> = {
 };
 
 export function AnalysisRunsPage() {
-  const { rows, error } = useAnalysisRuns();
+  const { rows, error, deleteRun } = useAnalysisRuns();
 
   return <Card>
     <CardHeader><CardTitle>Analyses</CardTitle></CardHeader>
@@ -27,6 +28,7 @@ export function AnalysisRunsPage() {
           <TableHead>Query</TableHead>
           <TableHead className="text-right">Relevance</TableHead>
           <TableHead>Result</TableHead>
+          <TableHead />
         </TableRow></TableHeader>
         <TableBody>{rows.map(({ run, result }) => <TableRow key={run.id}>
           <TableCell><Button asChild variant="link" className="p-0"><Link to={`/analyses/${run.id}`}>{new Date(run.createdAt).toLocaleString()}</Link></Button></TableCell>
@@ -34,6 +36,7 @@ export function AnalysisRunsPage() {
           <TableCell className="whitespace-normal">{run.query}</TableCell>
           <TableCell className="text-right tabular-nums">{run.overallScore.toFixed(2)}</TableCell>
           <TableCell>{resultLabels[result]}</TableCell>
+          <TableCell className="text-right"><DeleteRunButton title={run.article.title} onConfirm={() => deleteRun(run.id)} /></TableCell>
         </TableRow>)}</TableBody>
       </Table>}
     </CardContent>

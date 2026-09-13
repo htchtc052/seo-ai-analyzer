@@ -29,6 +29,7 @@ test('article import and analysis boundaries', async () => {
 
     analysisRunListSchema.parse(await (await fetch(`${base}/analyses`)).json());
     assert.equal((await fetch(`${base}/analyses/missing`)).status, 404);
+    assert.equal((await fetch(`${base}/analyses/missing`, { method: 'DELETE' })).status, 404);
   } finally {
     await app.close();
   }

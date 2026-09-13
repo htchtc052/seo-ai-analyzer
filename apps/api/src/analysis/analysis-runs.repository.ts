@@ -32,6 +32,10 @@ export class AnalysisRunsRepository {
     });
   }
 
+  delete(id: string) {
+    return this.prisma.analysisRun.delete({ where: { id } });
+  }
+
   saveRecommendation(id: string, recommendation: Recommendation) {
     return this.prisma.analysisRun.update({ where: { id }, data: recommendation });
   }

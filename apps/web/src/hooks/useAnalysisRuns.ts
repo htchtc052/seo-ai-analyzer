@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { AnalysisRunSummary } from '@semantic/contracts';
-import { getAnalysisRuns } from '@/lib/api';
+import { deleteAnalysisRun, getAnalysisRuns } from '@/lib/api';
 
 export type AnalysisRunResult = 'scores-only' | 'recommendations-ready' | 'recommendations-pending';
 
@@ -22,5 +22,15 @@ export function useAnalysisRuns() {
     return () => controller.abort();
   }, []);
 
-  return { rows: runs?.map(run => ({ run, result: getResult(run) })), error };
+  async function deleteRun(id: string) {
+    setError('');
+    try {
+      await deleteAnalysisRun(id);
+      setRuns(current => current?.filter(run => run.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not delete the analysis');
+    }
+  }
+
+  return { rows: runs?.map(run => ({ run, result: getResult(run) })), error, deleteRun };
 }

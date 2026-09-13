@@ -3,6 +3,7 @@ import type { ArticleSection } from '@semantic/contracts';
 import { parseHTML } from 'linkedom';
 
 const TEXT_BLOCKS = 'h2, h3, p, li, blockquote, pre, div';
+const MIN_PARAGRAPH_LENGTH = 40;
 
 export type ExtractedArticle = { title: string; sections: ArticleSection[] };
 
@@ -28,6 +29,7 @@ function toSections(html: string): ArticleSection[] {
       sections.push(current);
       continue;
     }
+    if (text.length < MIN_PARAGRAPH_LENGTH) continue;
     if (!current) {
       current = { heading: null, paragraphs: [] };
       sections.push(current);

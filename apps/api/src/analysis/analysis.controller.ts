@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Post } from '@nestjs/common';
 import {
   analysisRequestSchema,
   analysisRunListSchema,
@@ -41,5 +41,11 @@ export class AnalysisController {
   @ResponseSchema(analysisRunResponseSchema)
   async findById(@Param('id') id: string) {
     return { run: await this.analysis.findById(id) };
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async delete(@Param('id') id: string) {
+    await this.analysis.delete(id);
   }
 }

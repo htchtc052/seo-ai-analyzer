@@ -11,7 +11,7 @@ export class RecommendationService {
   ) {}
 
   get enabled(): boolean {
-    return this.llm.enabled;
+    return this.llm.chatEnabled;
   }
 
   recommend(input: RecommendationPromptInput): Promise<Recommendation> {
