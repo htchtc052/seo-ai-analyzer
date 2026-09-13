@@ -1,101 +1,38 @@
 # Деплой
 
-## Схема
-
-Прод — один заменяемый VPS на Ubuntu с адресом `seo-analyzer.proclouds.ru`.
-
-- Push в `main` запускает workflow **Publish images**: typecheck, миграции и тесты на Postgres и Redis в Actions, затем сборка образов `ghcr.io/htchtc052/seo-ai-analyzer-api:latest` (NestJS и Prisma CLI для миграций) и `ghcr.io/htchtc052/seo-ai-analyzer-web:latest` (статика в nginx). Публикация ничего не выкатывает.
-- Деплой — `infra/deploy.sh`, запускается вручную по SSH: скачивает образы, применяет миграции временным контейнером из образа api, пересоздаёт контейнеры и проверяет `https://<APP_DOMAIN>/api/health`. Если миграция упала, работающие контейнеры не заменяются. Ключей и секретов в GitHub нет.
-- VPS ничего не собирает. На нём только папка `infra` этого репозитория (sparse checkout), `.env` и Docker volumes.
-- Traefik выпускает сертификат Let's Encrypt, отправляет `/api` в контейнер API, остальное — в nginx со статикой web.
-- Ollama работает на хосте VPS, API ходит к ней через `host.docker.internal`. Оценки требуют embedding-модель; рекомендации включаются, только если в `.env` задан `OLLAMA_CHAT_MODEL` и модель скачана.
-
-```
-/srv/seo-ai-analyzer/
-└── infra   ← docker-compose.yml и прод-.env
-```
+Прод — VPS с Ubuntu, домен `seo-analyzer.proclouds.ru`. Push в `main` публикует образы в GHCR, выкатка — вручную скриптом `infra/deploy.sh`.
 
 ## Новый сервер
 
-A-запись `seo-analyzer.proclouds.ru` должна указывать на сервер до первого запуска: Let's Encrypt проверяет домен по HTTP.
-
-Docker:
+A-запись домена должна указывать на сервер до первого запуска, иначе Let's Encrypt не выпустит сертификат.
 
 ```bash
 curl -fsSL https://get.docker.com | sh
-```
 
-Docker Hub отдаёт `429` анонимным клиентам с адресов Timeweb. Если `docker compose pull` упирается в лимит, пропишите зеркало `https://dockerhub.timeweb.cloud` в `/etc/docker/daemon.json` и перезапустите Docker.
-
-Ollama на хосте. Она должна слушать не только loopback, иначе контейнер до неё не достучится. Скачивается только embedding-модель:
-
-```bash
 curl -fsSL https://ollama.com/install.sh | sh
 mkdir -p /etc/systemd/system/ollama.service.d
 printf '[Service]\nEnvironment="OLLAMA_HOST=0.0.0.0:11434"\n' > /etc/systemd/system/ollama.service.d/override.conf
 systemctl daemon-reload && systemctl restart ollama
 ollama pull embeddinggemma
-```
 
-Рекомендации (`qwen3:4b`) нужны около 3 ГБ свободной памяти сверх стека. На сервере с 2 ГБ их не включать. Когда памяти хватает: `ollama pull qwen3:4b`, раскомментировать `OLLAMA_CHAT_MODEL` в `.env` и выполнить `docker compose up -d api`.
-
-Swap страхует embedding-модель и Node от OOM на маленьком сервере:
-
-```bash
 fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
 echo '/swapfile none swap sw 0 0' >> /etc/fstab
-```
 
-Инфраструктура и секреты:
-
-```bash
 git clone --filter=blob:none --sparse https://github.com/htchtc052/seo-ai-analyzer.git /srv/seo-ai-analyzer
-cd /srv/seo-ai-analyzer
-git sparse-checkout set infra
-cd infra
-cp .env.example .env && chmod 600 .env
+cd /srv/seo-ai-analyzer && git sparse-checkout set infra
+cp infra/.env.example infra/.env && chmod 600 infra/.env
 ```
 
-В `.env` заполнить:
+В `infra/.env` задать `POSTGRES_PASSWORD` и `REDIS_PASSWORD` через `openssl rand -hex 24` — пароли входят в URL подключения, поэтому только hex. Затем `infra/deploy.sh`.
 
-- `ACME_EMAIL` — реальный ящик, сюда Let's Encrypt пишет об истечении сертификата;
-- `POSTGRES_PASSWORD`, `REDIS_PASSWORD` — `openssl rand -hex 24`. Пароли подставляются в URL подключения, поэтому только hex.
-
-Первый запуск:
-
-```bash
-/srv/seo-ai-analyzer/infra/deploy.sh
-```
-
-## GitHub
-
-GHCR создаёт пакеты приватными. После первой публикации откройте каждый пакет (Packages → `seo-ai-analyzer-api`, `seo-ai-analyzer-web` → Package settings) и сделайте его публичным: тогда VPS скачивает образы без логина и токенов на сервере.
+Рекомендациям нужно около 3 ГБ свободной памяти сверх стека. Когда её хватает: `ollama pull qwen3:4b`, раскомментировать `OLLAMA_CHAT_MODEL` в `.env`, выполнить `docker compose up -d api`.
 
 ## Обновление
 
-1. Push в `main`, дождаться зелёного **Publish images**.
-2. С машины, у которой есть SSH-доступ к серверу:
+После зелёного **Publish images**:
 
 ```bash
 ssh root@<VPS_HOST> 'cd /srv/seo-ai-analyzer && git pull --ff-only && infra/deploy.sh'
 ```
 
-`git pull` идёт до запуска скрипта, поэтому выполняется уже обновлённый `deploy.sh`.
-
-Новая переменная в `.env.example` сама на сервер не попадает — её нужно дописать в `/srv/seo-ai-analyzer/infra/.env`.
-
-## Данные
-
-- Образы можно скачать заново в любой момент; база, Redis, сертификаты и `.env` живут только на сервере. Полная копия — образ диска Timeweb при остановленном стеке (`docker compose stop`).
-- Никогда не запускать `docker compose down -v`: удалятся база и сертификаты.
-- Сброс базы — только по явному решению:
-
-```bash
-cd /srv/seo-ai-analyzer/infra
-docker compose pull api
-docker compose down
-docker volume rm seo-ai-analyzer_pg_data seo-ai-analyzer_redis_data
-docker compose up -d --wait postgres redis
-docker compose run --rm api npx --no-install prisma migrate deploy
-docker compose up -d
-```
+Новые переменные из `.env.example` на сервер сами не попадают. `docker compose down -v` удаляет базу и сертификаты.
