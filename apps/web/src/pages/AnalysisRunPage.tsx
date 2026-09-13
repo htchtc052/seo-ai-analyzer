@@ -11,10 +11,10 @@ import { useAnalysisRun } from '@/hooks/useAnalysisRun';
 
 export function AnalysisRunPage() {
   const { id = '' } = useParams();
-  const { run, error, recommendationStatus } = useAnalysisRun(id);
+  const { run, error, recommendationStatus, sections } = useAnalysisRun(id);
 
   if (error) return <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>;
-  if (!run || !recommendationStatus) return <p className="text-sm text-muted-foreground">Loading analysis…</p>;
+  if (!run || !recommendationStatus || !sections) return <p className="text-sm text-muted-foreground">Loading analysis…</p>;
 
   return <Card>
     <CardHeader>
@@ -25,7 +25,7 @@ export function AnalysisRunPage() {
       <AnalysisRunInputs run={run} />
       <section className="grid gap-4">
         <h3 className="font-semibold">Overall relevance: <span className="text-primary tabular-nums">{run.overallScore.toFixed(2)}</span></h3>
-        <ScoreChart fragments={run.fragments} />
+        <ScoreChart sections={sections} />
       </section>
       {recommendationStatus === 'not-requested' && <p className="text-sm text-muted-foreground">No competitors were added, so recommendations were not requested.</p>}
       {recommendationStatus === 'failed' && <Alert variant="destructive"><AlertDescription>{run.recommendationJob?.failedReason}</AlertDescription></Alert>}

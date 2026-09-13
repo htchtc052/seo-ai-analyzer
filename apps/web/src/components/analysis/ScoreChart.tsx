@@ -1,16 +1,18 @@
-import type { FragmentScore } from '@semantic/contracts';
+import type { ScoredSection } from '@/hooks/useAnalysisRun';
 import { Progress } from '@/components/ui/progress';
 
-export function ScoreChart({ fragments }: { fragments: FragmentScore[] }) {
-  return <figure className="grid gap-4">
-    <figcaption className="text-sm text-muted-foreground">Cosine similarity of each fragment to the query, on a 0–1 scale</figcaption>
-    <ol className="grid gap-4">
-      {fragments.map((fragment, index) => <li key={index} className="grid grid-cols-[1fr_3rem] items-center gap-x-3 gap-y-1 md:grid-cols-[11rem_1fr_3rem]">
-        <span className="col-span-2 text-sm font-medium md:col-span-1">{fragment.heading ?? 'Introduction'}</span>
-        <Progress value={Math.max(fragment.score, 0) * 100} />
-        <span className="text-right text-sm tabular-nums">{fragment.score.toFixed(2)}</span>
-        <span className="col-span-2 text-xs leading-relaxed text-muted-foreground md:col-start-2">{fragment.text}</span>
-      </li>)}
-    </ol>
+export function ScoreChart({ sections }: { sections: ScoredSection[] }) {
+  return <figure className="grid gap-6">
+    <figcaption className="text-sm text-muted-foreground">Cosine similarity of each paragraph to the query, on a 0–1 scale</figcaption>
+    {sections.map((section, sectionIndex) => <section key={sectionIndex} className="grid gap-3">
+      <h4 className="text-sm font-semibold">{section.heading ?? 'Introduction'}</h4>
+      <ol className="grid gap-4">
+        {section.fragments.map((fragment, index) => <li key={index} className="grid grid-cols-[1fr_3rem] items-center gap-x-3 gap-y-1">
+          <Progress value={Math.max(fragment.score, 0) * 100} />
+          <span className="text-right text-sm tabular-nums">{fragment.score.toFixed(2)}</span>
+          <span className="col-span-2 text-xs leading-relaxed text-muted-foreground">{fragment.text}</span>
+        </li>)}
+      </ol>
+    </section>)}
   </figure>;
 }

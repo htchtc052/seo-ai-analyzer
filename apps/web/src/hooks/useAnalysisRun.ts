@@ -1,8 +1,20 @@
 import { useEffect, useState } from 'react';
-import type { AnalysisRun } from '@semantic/contracts';
+import type { AnalysisRun, FragmentScore } from '@semantic/contracts';
 import { getAnalysisRun } from '@/lib/api';
 
 const POLL_INTERVAL_MS = 2000;
+
+export type ScoredSection = { heading: string | null; fragments: FragmentScore[] };
+
+function groupBySection(fragments: FragmentScore[]): ScoredSection[] {
+  const sections: ScoredSection[] = [];
+  for (const fragment of fragments) {
+    const last = sections.at(-1);
+    if (last && last.heading === fragment.heading) last.fragments.push(fragment);
+    else sections.push({ heading: fragment.heading, fragments: [fragment] });
+  }
+  return sections;
+}
 
 export type RecommendationStatus = 'not-requested' | 'queued' | 'writing' | 'ready' | 'failed' | 'job-missing';
 
@@ -31,5 +43,10 @@ export function useAnalysisRun(id: string) {
     return () => { controller.abort(); window.clearTimeout(timer); };
   }, [id]);
 
-  return { run, error, recommendationStatus: run && getRecommendationStatus(run) };
+  return {
+    run,
+    error,
+    recommendationStatus: run && getRecommendationStatus(run),
+    sections: run && groupBySection(run.fragments),
+  };
 }
