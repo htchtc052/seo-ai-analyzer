@@ -8,7 +8,7 @@
 - Деплой — ручной workflow **Deploy**: по SSH скачивает образы, применяет миграции временным контейнером из образа api, пересоздаёт контейнеры и проверяет `https://<APP_DOMAIN>/api/health`. Если миграция упала, работающие контейнеры не заменяются.
 - VPS ничего не собирает. На нём только папка `infra` этого репозитория (sparse checkout), `.env` и Docker volumes.
 - Traefik выпускает сертификат Let's Encrypt, отправляет `/api` в контейнер API, остальное — в nginx со статикой web.
-- Ollama работает на хосте VPS, API ходит к ней через `host.docker.internal`.
+- Ollama работает на хосте VPS, API ходит к ней через `host.docker.internal`. Оценки требуют embedding-модель; рекомендации включаются, только если в `.env` задан `OLLAMA_CHAT_MODEL` и модель скачана.
 
 ```
 /srv/seo-ai-analyzer/
@@ -27,7 +27,7 @@ curl -fsSL https://get.docker.com | sh
 
 Docker Hub отдаёт `429` анонимным клиентам с адресов Timeweb. Если `docker compose pull` упирается в лимит, пропишите зеркало `https://dockerhub.timeweb.cloud` в `/etc/docker/daemon.json` и перезапустите Docker.
 
-Ollama на хосте. Она должна слушать не только loopback, иначе контейнер до неё не достучится; снаружи порт закрывает файрвол:
+Ollama на хосте. Она должна слушать не только loopback, иначе контейнер до неё не достучится; снаружи порт закрывает файрвол. Скачивается только embedding-модель:
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
@@ -35,7 +35,15 @@ mkdir -p /etc/systemd/system/ollama.service.d
 printf '[Service]\nEnvironment="OLLAMA_HOST=0.0.0.0:11434"\n' > /etc/systemd/system/ollama.service.d/override.conf
 systemctl daemon-reload && systemctl restart ollama
 ollama pull embeddinggemma
-ollama pull qwen3:4b
+```
+
+Рекомендации (`qwen3:4b`) нужны около 3 ГБ свободной памяти сверх стека. На сервере с 2 ГБ их не включать. Когда памяти хватает: `ollama pull qwen3:4b`, раскомментировать `OLLAMA_CHAT_MODEL` в `.env` и выполнить `docker compose up -d api`.
+
+Swap страхует embedding-модель и Node от OOM на маленьком сервере:
+
+```bash
+fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
 ```
 
 Файрвол: наружу только SSH, 80 и 443; Ollama доступна только из Docker-сетей.

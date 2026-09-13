@@ -33,14 +33,14 @@ export class OllamaService {
     return body.embeddings;
   }
 
-  async chatStructured<T>(prompt: string, schema: ZodType<T>): Promise<T> {
+  async chatStructured<T>(model: string, prompt: string, schema: ZodType<T>): Promise<T> {
     const response = await fetch(
       new URL('/api/chat', this.config.get('OLLAMA_BASE_URL', { infer: true })),
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: this.config.get('OLLAMA_CHAT_MODEL', { infer: true }),
+          model,
           messages: [{ role: 'user', content: prompt }],
           stream: false,
           think: false,

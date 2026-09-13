@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 import type {
@@ -6,6 +6,7 @@ import type {
   AnalysisRun,
   AnalysisRunSummary,
   ArticleSection,
+  Features,
   FragmentScore,
   RecommendationJob,
 } from '@semantic/contracts';
@@ -35,6 +36,12 @@ export class AnalysisService {
   ) {}
 
   async start(input: AnalysisRequest): Promise<AnalysisRun> {
+    if (input.competitorIds.length > 0 && !this.recommendations.enabled) {
+      throw new UnprocessableEntityException({
+        code: 'RECOMMENDATIONS_DISABLED',
+        message: 'Recommendations are disabled on this server, so competitors cannot be added',
+      });
+    }
     const article = await this.articles.findById(input.articleId);
     await Promise.all(input.competitorIds.map((id) => this.articles.findById(id)));
 
@@ -64,6 +71,10 @@ export class AnalysisService {
       missingEntities: run.missingEntities,
       recommendationJob: run.competitors.length > 0 ? await this.findRecommendationJob(id) : null,
     };
+  }
+
+  features(): Features {
+    return { recommendations: this.recommendations.enabled };
   }
 
   async findRecent(): Promise<AnalysisRunSummary[]> {

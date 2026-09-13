@@ -3,6 +3,7 @@ import {
   analysisRequestSchema,
   analysisRunListSchema,
   analysisRunResponseSchema,
+  featuresResponseSchema,
   type AnalysisRequest,
 } from '@semantic/contracts';
 import { ResponseSchema } from '../common/response-schema.decorator.js';
@@ -28,6 +29,12 @@ export class AnalysisController {
   @ResponseSchema(analysisRunListSchema)
   async findRecent() {
     return { runs: await this.analysis.findRecent() };
+  }
+
+  @Get('features')
+  @ResponseSchema(featuresResponseSchema)
+  features() {
+    return { features: this.analysis.features() };
   }
 
   @Get(':id')

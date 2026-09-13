@@ -6,11 +6,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useNewAnalysis } from '@/hooks/useNewAnalysis';
+import { useNewAnalysis, type AnalysisHint } from '@/hooks/useNewAnalysis';
+
+const hints: Record<AnalysisHint, string> = {
+  'recommendations-disabled': 'Recommendations are disabled on this server, so the analysis calculates relevance scores only.',
+  'with-competitors': 'Scores are calculated right away. Recommendations against your competitors are written in the background and take about a minute.',
+  'without-competitors': 'Without competitors the analysis calculates relevance scores only. Fetch a competitor to also get recommendations.',
+};
 
 export function NewAnalysisPage() {
-  const { topics, topic, setTopic, article, selectArticle, competitors, selectCompetitor, hasCompetitors, form, submit, error } = useNewAnalysis();
+  const { features, topics, topic, setTopic, article, selectArticle, competitors, selectCompetitor, hint, form, submit, error } = useNewAnalysis();
   const { register, formState: { errors, isSubmitting } } = form;
+
+  if (!features || !hint) {
+    return error
+      ? <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>
+      : <p className="text-sm text-muted-foreground">Loading…</p>;
+  }
 
   return <form className="grid items-start gap-6 md:grid-cols-2" onSubmit={submit} noValidate>
     <Card>
@@ -28,7 +40,7 @@ export function NewAnalysisPage() {
             />
             <FieldError errors={[errors.articleId]} />
           </Field>
-          {topic.competitors.map((example, index) => <Field key={index}>
+          {features.recommendations && topic.competitors.map((example, index) => <Field key={index}>
             <ArticleFetch
               label={`Competitor ${index + 1} (optional)`}
               example={example}
@@ -37,7 +49,7 @@ export function NewAnalysisPage() {
               onChange={next => selectCompetitor(index, next)}
             />
           </Field>)}
-          <FieldError errors={[errors.competitorIds]} />
+          {features.recommendations && <FieldError errors={[errors.competitorIds]} />}
         </FieldGroup>
       </CardContent>
     </Card>
@@ -68,9 +80,7 @@ export function NewAnalysisPage() {
           <Field>
             <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Scoring…' : 'Run analysis'}</Button>
             <FieldDescription>
-              {hasCompetitors
-                ? 'Scores are calculated right away. Recommendations against your competitors are written in the background and take about a minute.'
-                : 'Without competitors the analysis calculates relevance scores only. Fetch a competitor to also get recommendations.'}
+              {hints[hint]}
             </FieldDescription>
           </Field>
           {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}

@@ -20,7 +20,7 @@ npm run dev
 
 Docker поднимает только Postgres (`5433`) и Redis (`6380`). API и веб запускаются через `npm run dev`, контейнеров для приложения нет.
 
-Ollama работает на хосте (`ollama serve`) с моделями `embeddinggemma` и `qwen3:4b`. Модели меняются через `OLLAMA_EMBEDDING_MODEL` и `OLLAMA_CHAT_MODEL` в `apps/api/.env`.
+Ollama работает на хосте (`ollama serve`) с моделями `embeddinggemma` и `qwen3:4b`. Модели меняются через `OLLAMA_EMBEDDING_MODEL` и `OLLAMA_CHAT_MODEL` в `apps/api/.env`. Без `OLLAMA_CHAT_MODEL` рекомендации выключены: форма не предлагает конкурентов, API отклоняет их с `RECOMMENDATIONS_DISABLED`, анализ считает только оценки.
 
 ## Как устроен анализ
 
@@ -35,6 +35,7 @@ Ollama работает на хосте (`ollama serve`) с моделями `em
 - `POST /api/articles/import` — `{ url }`, `GET /api/articles/:id`
 - `POST /api/analyses` — `{ articleId, query, competitorIds, audience, purpose, niche }`
 - `GET /api/analyses` — последние 50 запусков
+- `GET /api/analyses/features` — `{ recommendations }`: включены ли рекомендации на этом сервере
 - `GET /api/analyses/:id` — запуск с оценками по абзацам, конкурентами, рекомендациями и состоянием джоба
 
 ## Проверки и сборка

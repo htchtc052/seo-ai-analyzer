@@ -3,6 +3,7 @@ import {
   analysisRunResponseSchema,
   apiErrorSchema,
   articleResponseSchema,
+  featuresResponseSchema,
   type AnalysisRequest,
 } from '@semantic/contracts';
 
@@ -38,4 +39,8 @@ export async function getAnalysisRun(id: string, signal?: AbortSignal) {
 
 export async function getAnalysisRuns(signal?: AbortSignal) {
   return analysisRunListSchema.parse(await request('/analyses', { signal })).runs;
+}
+
+export async function getFeatures(signal?: AbortSignal) {
+  return featuresResponseSchema.parse(await request('/analyses/features', { signal })).features;
 }

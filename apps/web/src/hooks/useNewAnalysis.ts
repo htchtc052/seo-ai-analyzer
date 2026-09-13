@@ -1,18 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router';
-import { analysisRequestSchema, type Article } from '@semantic/contracts';
+import { analysisRequestSchema, type Article, type Features } from '@semantic/contracts';
 import topics from '@semantic/examples/topics.json';
-import { startAnalysis } from '@/lib/api';
+import { getFeatures, startAnalysis } from '@/lib/api';
 
 export type Topic = (typeof topics)[number];
+
+export type AnalysisHint = 'recommendations-disabled' | 'with-competitors' | 'without-competitors';
+
+function getHint(features: Features, competitors: (Article | undefined)[]): AnalysisHint {
+  if (!features.recommendations) return 'recommendations-disabled';
+  return competitors.some(Boolean) ? 'with-competitors' : 'without-competitors';
+}
 
 export function useNewAnalysis() {
   const navigate = useNavigate();
   const [topic, setTopic] = useState<Topic>(topics[0]!);
   const [article, setArticle] = useState<Article>();
   const [competitors, setCompetitors] = useState<(Article | undefined)[]>([]);
+  const [features, setFeatures] = useState<Features>();
   const [error, setError] = useState('');
   const form = useForm({
     resolver: zodResolver(analysisRequestSchema),
@@ -20,6 +28,14 @@ export function useNewAnalysis() {
     defaultValues: { articleId: '', query: '', competitorIds: [], audience: '', purpose: '', niche: '' },
   });
   const { isSubmitted } = form.formState;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    getFeatures(controller.signal).then(setFeatures).catch(err => {
+      if (!controller.signal.aborted) setError(err.message);
+    });
+    return () => controller.abort();
+  }, []);
 
   function selectArticle(next: Article | undefined) {
     setArticle(next);
@@ -44,6 +60,7 @@ export function useNewAnalysis() {
   });
 
   return {
+    features,
     topics,
     topic,
     setTopic,
@@ -51,7 +68,7 @@ export function useNewAnalysis() {
     selectArticle,
     competitors,
     selectCompetitor,
-    hasCompetitors: competitors.some(Boolean),
+    hint: features && getHint(features, competitors),
     form,
     submit,
     error,

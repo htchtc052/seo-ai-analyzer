@@ -72,6 +72,9 @@ export const analysisRunSchema = analysisRunSummarySchema.omit({ competitorCount
 export const analysisRunResponseSchema = z.object({ run: analysisRunSchema });
 export const analysisRunListSchema = z.object({ runs: z.array(analysisRunSummarySchema) });
 
+export const featuresSchema = z.object({ recommendations: z.boolean() });
+export const featuresResponseSchema = z.object({ features: featuresSchema });
+
 export const apiErrorSchema = z.object({
   error: z.object({ code: z.string(), message: z.string(), fields: z.record(z.string(), z.array(z.string())).optional() }),
 });
@@ -86,3 +89,4 @@ export type Recommendation = z.infer<typeof recommendationSchema>;
 export type RecommendationJob = z.infer<typeof recommendationJobSchema>;
 export type AnalysisRunSummary = z.infer<typeof analysisRunSummarySchema>;
 export type AnalysisRun = z.infer<typeof analysisRunSchema>;
+export type Features = z.infer<typeof featuresSchema>;
