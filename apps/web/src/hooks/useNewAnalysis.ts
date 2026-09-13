@@ -18,6 +18,8 @@ function getHint(features: Features, competitors: (Article | undefined)[]): Anal
 export function useNewAnalysis() {
   const navigate = useNavigate();
   const [topic, setTopic] = useState<Topic>(topics[0]!);
+  const [articleUrl, setArticleUrl] = useState('');
+  const [competitorUrls, setCompetitorUrls] = useState<string[]>(topic.competitors.map(() => ''));
   const [article, setArticle] = useState<Article>();
   const [competitors, setCompetitors] = useState<(Article | undefined)[]>([]);
   const [features, setFeatures] = useState<Features>();
@@ -49,6 +51,19 @@ export function useNewAnalysis() {
     form.setValue('competitorIds', ids, { shouldValidate: isSubmitted });
   }
 
+  function selectTopic(next: Topic) {
+    setTopic(next);
+    setArticleUrl(next.article.url);
+    setCompetitorUrls(next.competitors.map(example => example.url));
+    selectArticle(undefined);
+    setCompetitors([]);
+    form.setValue('competitorIds', [], { shouldValidate: isSubmitted });
+  }
+
+  function changeCompetitorUrl(index: number, url: string) {
+    setCompetitorUrls(competitorUrls.map((current, position) => position === index ? url : current));
+  }
+
   const submit = form.handleSubmit(async values => {
     setError('');
     try {
@@ -63,7 +78,11 @@ export function useNewAnalysis() {
     features,
     topics,
     topic,
-    setTopic,
+    selectTopic,
+    articleUrl,
+    setArticleUrl,
+    competitorUrls,
+    changeCompetitorUrl,
     article,
     selectArticle,
     competitors,

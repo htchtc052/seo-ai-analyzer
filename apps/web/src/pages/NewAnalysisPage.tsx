@@ -15,7 +15,10 @@ const hints: Record<AnalysisHint, string> = {
 };
 
 export function NewAnalysisPage() {
-  const { features, topics, topic, setTopic, article, selectArticle, competitors, selectCompetitor, hint, form, submit, error } = useNewAnalysis();
+  const {
+    features, topics, topic, selectTopic, articleUrl, setArticleUrl, competitorUrls, changeCompetitorUrl,
+    article, selectArticle, competitors, selectCompetitor, hint, form, submit, error,
+  } = useNewAnalysis();
   const { register, formState: { errors, isSubmitting } } = form;
 
   if (!features || !hint) {
@@ -29,21 +32,25 @@ export function NewAnalysisPage() {
       <CardHeader><CardTitle>Articles</CardTitle></CardHeader>
       <CardContent>
         <FieldGroup>
-          <Field>
+          <Field key={topic.title}>
             <ArticleFetch
               label="Your article"
               example={topic.article}
-              exampleAction={<TopicPicker topics={topics} topic={topic} disabled={isSubmitting} onSelect={setTopic} />}
+              exampleAction={<TopicPicker topics={topics} topic={topic} disabled={isSubmitting} onSelect={selectTopic} />}
+              url={articleUrl}
+              onUrlChange={setArticleUrl}
               article={article}
               disabled={isSubmitting}
               onChange={selectArticle}
             />
             <FieldError errors={[errors.articleId]} />
           </Field>
-          {features.recommendations && topic.competitors.map((example, index) => <Field key={index}>
+          {features.recommendations && topic.competitors.map((example, index) => <Field key={`${topic.title}-${index}`}>
             <ArticleFetch
               label={`Competitor ${index + 1} (optional)`}
               example={example}
+              url={competitorUrls[index]!}
+              onUrlChange={url => changeCompetitorUrl(index, url)}
               article={competitors[index]}
               disabled={isSubmitting}
               onChange={next => selectCompetitor(index, next)}

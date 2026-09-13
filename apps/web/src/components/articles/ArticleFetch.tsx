@@ -11,14 +11,16 @@ type Props = {
   label: string;
   example: { site: string; url: string };
   exampleAction?: ReactNode;
+  url: string;
+  onUrlChange: (url: string) => void;
   article: Article | undefined;
   disabled: boolean;
   onChange: (article: Article | undefined) => void;
 };
 
-export function ArticleFetch({ label, example, exampleAction, article, disabled, onChange }: Props) {
+export function ArticleFetch({ label, example, exampleAction, url, onUrlChange, article, disabled, onChange }: Props) {
   const id = useId();
-  const { url, pending, error, canFetch, changeUrl, fetchArticle } = useArticleImport(article, onChange);
+  const { pending, error, canFetch, changeUrl, fetchArticle } = useArticleImport({ url, onUrlChange, article, onChange });
 
   return <div className="grid gap-2">
     <Label htmlFor={id}>{label}</Label>

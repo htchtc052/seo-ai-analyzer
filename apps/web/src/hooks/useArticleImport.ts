@@ -2,13 +2,19 @@ import { useState } from 'react';
 import type { Article } from '@semantic/contracts';
 import { importArticle } from '@/lib/api';
 
-export function useArticleImport(article: Article | undefined, onChange: (article: Article | undefined) => void) {
-  const [url, setUrl] = useState('');
+type Options = {
+  url: string;
+  onUrlChange: (url: string) => void;
+  article: Article | undefined;
+  onChange: (article: Article | undefined) => void;
+};
+
+export function useArticleImport({ url, onUrlChange, article, onChange }: Options) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
 
   function changeUrl(value: string) {
-    setUrl(value);
+    onUrlChange(value);
     setError('');
     if (article) onChange(undefined);
   }

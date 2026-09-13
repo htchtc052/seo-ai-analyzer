@@ -17,7 +17,7 @@ export function TopicPicker({ topics, topic, disabled, onSelect }: Props) {
     <DialogContent>
       <DialogHeader>
         <DialogTitle>Example topic</DialogTitle>
-        <DialogDescription>Example links for your article and both competitors switch to the chosen topic.</DialogDescription>
+        <DialogDescription>Links for your article and both competitors are filled in from the chosen topic.</DialogDescription>
       </DialogHeader>
       <div className="grid gap-2">
         {topics.map(item => <DialogClose key={item.title} asChild>
