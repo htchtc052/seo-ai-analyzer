@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ArticlesModule } from '../articles/articles.module.js';
+import { LlmModule } from '../llm/llm.module.js';
 import { OllamaModule } from '../ollama/ollama.module.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { ANALYSIS_QUEUE } from './lib/analysis-queue.js';
@@ -14,6 +15,7 @@ import { RelevanceService } from './relevance.service.js';
 @Module({
   imports: [
     ArticlesModule,
+    LlmModule,
     OllamaModule,
     PrismaModule,
     BullModule.registerQueue({ name: ANALYSIS_QUEUE }),

@@ -1,8 +1,8 @@
 # SEO AI Analyzer
 
-Анализ семантической релевантности статьи поисковому запросу: оценка каждого абзаца через embeddings и рекомендации по сравнению с конкурентами от LLM. React, NestJS, Postgres, BullMQ, Ollama.
+Анализ семантической релевантности статьи поисковому запросу: оценка каждого абзаца через embeddings и рекомендации по сравнению с конкурентами от LLM. React, NestJS, Postgres, BullMQ, Ollama и любой OpenAI-совместимый API для рекомендаций.
 
-- Прод: https://seo-analyzer.proclouds.ru — на сервере 2 ГБ памяти, поэтому рекомендации там выключены и считаются только оценки. Полный сценарий — локально.
+- Прод: https://seo-analyzer.proclouds.ru — embeddings в Ollama на сервере, рекомендации через Timeweb AI Gateway.
 - Продукт — [`docs/pdr.md`](docs/pdr.md), технические решения — [`docs/adr/`](docs/adr/README.md), сервер — [`infra/DEPLOY.md`](infra/DEPLOY.md).
 
 ## Запуск
@@ -17,7 +17,7 @@ npm run db:migrate -w @semantic/api
 npm run dev
 ```
 
-Интерфейс — http://localhost:5173. Без `OLLAMA_CHAT_MODEL` в `apps/api/.env` рекомендации выключены.
+Интерфейс — http://localhost:5173. Локально рекомендации тоже идут в Ollama через её OpenAI-совместимый API; без `LLM_*` в `apps/api/.env` они выключены.
 
 ## Проверки
 

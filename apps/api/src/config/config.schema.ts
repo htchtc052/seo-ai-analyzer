@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+const unsetWhenEmpty = <T extends z.ZodType>(schema: T) => z.preprocess((value) => (value === '' ? undefined : value), schema.optional());
+
 export const configSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   API_HOST: z.string().min(1).default('127.0.0.1'),
@@ -9,7 +11,17 @@ export const configSchema = z.object({
   REDIS_URL: z.url(),
   OLLAMA_BASE_URL: z.url().default('http://127.0.0.1:11434'),
   OLLAMA_EMBEDDING_MODEL: z.string().trim().min(1).default('embeddinggemma'),
-  OLLAMA_CHAT_MODEL: z.string().trim().min(1).optional(),
+  LLM_BASE_URL: unsetWhenEmpty(z.url()),
+  LLM_API_KEY: unsetWhenEmpty(z.string().trim().min(1)),
+  LLM_CHAT_MODEL: unsetWhenEmpty(z.string().trim().min(1)),
+}).transform(({ LLM_BASE_URL, LLM_API_KEY, LLM_CHAT_MODEL, ...config }, context) => {
+  const values = [LLM_BASE_URL, LLM_API_KEY, LLM_CHAT_MODEL];
+  if (values.every((value) => value === undefined)) return { ...config, LLM: undefined };
+  if (!LLM_BASE_URL || !LLM_API_KEY || !LLM_CHAT_MODEL) {
+    context.addIssue({ code: 'custom', message: 'LLM_BASE_URL, LLM_API_KEY and LLM_CHAT_MODEL must be set together' });
+    return z.NEVER;
+  }
+  return { ...config, LLM: { baseUrl: LLM_BASE_URL, apiKey: LLM_API_KEY, model: LLM_CHAT_MODEL } };
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

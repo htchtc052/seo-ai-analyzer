@@ -25,7 +25,7 @@ cp infra/.env.example infra/.env && chmod 600 infra/.env
 
 В `infra/.env` задать `POSTGRES_PASSWORD` и `REDIS_PASSWORD` через `openssl rand -hex 24` — пароли входят в URL подключения, поэтому только hex. Затем `infra/deploy.sh`.
 
-Рекомендациям нужно около 3 ГБ свободной памяти сверх стека. Когда её хватает: `ollama pull qwen3:4b`, раскомментировать `OLLAMA_CHAT_MODEL` в `.env`, выполнить `docker compose up -d api`.
+Рекомендации: раскомментировать `LLM_BASE_URL`, `LLM_CHAT_MODEL` и вписать `LLM_API_KEY` из Timeweb AI Gateway в `infra/.env`, затем `docker compose up -d api` в `infra/`.
 
 ## Обновление
 
