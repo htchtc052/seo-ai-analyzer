@@ -1,0 +1,39 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, NavLink, Outlet, Route, Routes } from 'react-router';
+import { AnalysisRunPage } from '@/pages/AnalysisRunPage';
+import { AnalysisRunsPage } from '@/pages/AnalysisRunsPage';
+import { NewAnalysisPage } from '@/pages/NewAnalysisPage';
+import { Button } from '@/components/ui/button';
+import './styles.css';
+
+function Layout() {
+  return <main className="mx-auto max-w-6xl px-6 py-8">
+    <header className="mb-6 flex items-center justify-between gap-4">
+      <span className="text-xs font-bold tracking-widest text-muted-foreground">SEMANTIC RELEVANCE</span>
+      <nav className="flex gap-1">
+        <NavItem to="/" end>New analysis</NavItem>
+        <NavItem to="/analyses">Analyses</NavItem>
+      </nav>
+    </header>
+    <Outlet />
+  </main>;
+}
+
+function NavItem({ to, end, children }: { to: string; end?: boolean; children: string }) {
+  return <NavLink to={to} end={end}>
+    {({ isActive }) => <Button asChild variant={isActive ? 'secondary' : 'ghost'} size="sm"><span>{children}</span></Button>}
+  </NavLink>;
+}
+
+createRoot(document.getElementById('root')!).render(<React.StrictMode>
+  <BrowserRouter>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<NewAnalysisPage />} />
+        <Route path="analyses" element={<AnalysisRunsPage />} />
+        <Route path="analyses/:id" element={<AnalysisRunPage />} />
+      </Route>
+    </Routes>
+  </BrowserRouter>
+</React.StrictMode>);
