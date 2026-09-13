@@ -1,7 +1,5 @@
 name: seo-ai-analyzer
 
-x-database-url: &database-url postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
-
 services:
   traefik:
     image: traefik:v3.6
@@ -59,7 +57,7 @@ services:
       API_HOST: 0.0.0.0
       API_PORT: 3001
       WEB_ORIGIN: https://${APP_DOMAIN}
-      DATABASE_URL: *database-url
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       OLLAMA_BASE_URL: http://host.docker.internal:11434
     extra_hosts:
@@ -75,16 +73,6 @@ services:
       - traefik.http.routers.api.entrypoints=websecure
       - traefik.http.routers.api.tls.certresolver=letsencrypt
       - traefik.http.services.api.loadbalancer.server.port=3001
-
-  migrate:
-    image: ghcr.io/htchtc052/seo-ai-analyzer-migrate:latest
-    profiles:
-      - migrate
-    environment:
-      DATABASE_URL: *database-url
-    depends_on:
-      postgres:
-        condition: service_healthy
 
   web:
     image: ghcr.io/htchtc052/seo-ai-analyzer-web:latest

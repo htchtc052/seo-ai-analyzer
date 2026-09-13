@@ -57,16 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - image: api
-            app: api
-            target: runtime
-          - image: migrate
-            app: api
-            target: migrate
-          - image: web
-            app: web
-            target: ''
+        image: [api, web]
     steps:
       - uses: actions/checkout@v4
 
@@ -81,8 +72,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: apps/${{ matrix.app }}/.docker/Dockerfile
-          target: ${{ matrix.target }}
+          file: apps/${{ matrix.image }}/.docker/Dockerfile
           push: true
           tags: ghcr.io/htchtc052/seo-ai-analyzer-${{ matrix.image }}:latest
           labels: |

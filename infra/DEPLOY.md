@@ -4,8 +4,8 @@
 
 Прод — один заменяемый VPS на Ubuntu с адресом `seo-analyzer.proclouds.ru`.
 
-- Push в `main` запускает workflow **Publish images**: typecheck, миграции и тесты на Postgres и Redis в Actions, затем сборка трёх образов `ghcr.io/htchtc052/seo-ai-analyzer-*:latest`: `api` (NestJS без Prisma CLI), `migrate` (Prisma CLI и миграции, запускается разово) и `web` (статика в nginx). Публикация ничего не выкатывает.
-- Деплой — ручной workflow **Deploy**: по SSH скачивает образы, применяет миграции временным контейнером `migrate`, пересоздаёт контейнеры и проверяет `https://<APP_DOMAIN>/api/health`. Если миграция упала, работающие контейнеры не заменяются.
+- Push в `main` запускает workflow **Publish images**: typecheck, миграции и тесты на Postgres и Redis в Actions, затем сборка образов `ghcr.io/htchtc052/seo-ai-analyzer-api:latest` (NestJS и Prisma CLI для миграций) и `ghcr.io/htchtc052/seo-ai-analyzer-web:latest` (статика в nginx). Публикация ничего не выкатывает.
+- Деплой — ручной workflow **Deploy**: по SSH скачивает образы, применяет миграции временным контейнером из образа api, пересоздаёт контейнеры и проверяет `https://<APP_DOMAIN>/api/health`. Если миграция упала, работающие контейнеры не заменяются.
 - VPS ничего не собирает. На нём только папка `infra` этого репозитория (sparse checkout), `.env` и Docker volumes.
 - Traefik выпускает сертификат Let's Encrypt, отправляет `/api` в контейнер API, остальное — в nginx со статикой web.
 - Ollama работает на хосте VPS, API ходит к ней через `host.docker.internal`.
@@ -68,9 +68,9 @@ cp .env.example .env && chmod 600 .env
 
 ```bash
 cd /srv/seo-ai-analyzer/infra
-docker compose pull api web migrate
+docker compose pull api web
 docker compose up -d --wait postgres redis
-docker compose run --rm migrate
+docker compose run --rm api npx --no-install prisma migrate deploy
 docker compose up -d
 curl --fail https://seo-analyzer.proclouds.ru/api/health
 ```
@@ -82,7 +82,7 @@ curl --fail https://seo-analyzer.proclouds.ru/api/health
 - `VPS_HOST` — текущий публичный IP сервера; меняется при переезде;
 - `VPS_SSH_KEY` — приватный ключ, которым можно войти как `root`.
 
-GHCR создаёт пакеты приватными. После первой публикации откройте каждый пакет (Packages → `seo-ai-analyzer-api`, `seo-ai-analyzer-migrate`, `seo-ai-analyzer-web` → Package settings) и сделайте его публичным: тогда VPS скачивает образы без логина и токенов на сервере.
+GHCR создаёт пакеты приватными. После первой публикации откройте каждый пакет (Packages → `seo-ai-analyzer-api`, `seo-ai-analyzer-web` → Package settings) и сделайте его публичным: тогда VPS скачивает образы без логина и токенов на сервере.
 
 ## Обновление
 
@@ -104,10 +104,10 @@ gh run watch --repo htchtc052/seo-ai-analyzer
 
 ```bash
 cd /srv/seo-ai-analyzer/infra
-docker compose pull migrate
+docker compose pull api
 docker compose down
 docker volume rm seo-ai-analyzer_pg_data seo-ai-analyzer_redis_data
 docker compose up -d --wait postgres redis
-docker compose run --rm migrate
+docker compose run --rm api npx --no-install prisma migrate deploy
 docker compose up -d
 ```

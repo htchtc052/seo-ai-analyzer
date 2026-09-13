@@ -27,6 +27,7 @@
     "bullmq": "^6.3.4",
     "ioredis": "^6.0.0",
     "linkedom": "^0.18.13",
+    "prisma": "6.19.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
@@ -34,7 +35,6 @@
     "@nestjs/cli": "^12.0.0",
     "@semantic/examples": "*",
     "@types/node": "^24.0.0",
-    "prisma": "6.19.3",
     "tsx": "^4.20.0"
   }
 }

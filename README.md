@@ -55,16 +55,15 @@ npm run smoke:import -w @semantic/api
 
 Он проверяет, что импортируются все ссылки тем-примеров из `packages/examples/topics.json` (те же, что предлагает форма), а случаи из `apps/api/src/import.smoke.ts` отклоняются. Результат зависит от доступности сайтов.
 
-`npm audit` показывает high-severity предупреждение от `deepmerge-ts` через `@prisma/config`. Это транзитивная зависимость CLI Prisma: он есть только в образе `migrate`, и через него проходит только наш `schema.prisma`.
+`npm audit` показывает high-severity предупреждение от `deepmerge-ts` через `@prisma/config`. Это транзитивная зависимость CLI Prisma: в прод-образе CLI нужен только для `migrate deploy`, и через него проходит только наш `schema.prisma`.
 
 ## Деплой
 
-Push в `main` проверяет код и публикует образы `api`, `migrate` и `web` в GHCR (`.github/workflows/publish.yml`), выкатка на VPS — ручной workflow Deploy. Dockerfile лежат в `apps/<app>/.docker/`, прод-compose с Traefik — в `infra/`. Порядок настройки сервера и обновления — [`infra/DEPLOY.md`](infra/DEPLOY.md).
+Push в `main` проверяет код и публикует образы `api` и `web` в GHCR (`.github/workflows/publish.yml`), выкатка на VPS — ручной workflow Deploy. Dockerfile лежат в `apps/<app>/.docker/`, прод-compose с Traefik — в `infra/`. Порядок настройки сервера и обновления — [`infra/DEPLOY.md`](infra/DEPLOY.md).
 
 Прод-образы можно собрать локально:
 
 ```sh
-docker build -f apps/api/.docker/Dockerfile --target runtime -t seo-ai-analyzer-api .
-docker build -f apps/api/.docker/Dockerfile --target migrate -t seo-ai-analyzer-migrate .
+docker build -f apps/api/.docker/Dockerfile -t seo-ai-analyzer-api .
 docker build -f apps/web/.docker/Dockerfile -t seo-ai-analyzer-web .
 ```

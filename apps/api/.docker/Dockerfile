@@ -13,17 +13,12 @@ COPY packages/contracts packages/contracts
 COPY apps/api apps/api
 RUN npm run build -w @semantic/contracts && npm run build -w @semantic/api
 
-FROM base AS migrate
-RUN npm ci -w @semantic/api --no-audit --no-fund && rm -rf /root/.npm /root/.cache
-COPY apps/api/prisma apps/api/prisma
-WORKDIR /app/apps/api
-USER node
-CMD ["npx", "prisma", "migrate", "deploy"]
-
-FROM base AS runtime
+FROM base
 ENV NODE_ENV=production
-RUN npm ci --omit=dev --omit=optional -w @semantic/api --no-audit --no-fund && rm -rf /root/.npm /root/.cache
-COPY --from=build /app/apps/api/node_modules/.prisma apps/api/node_modules/.prisma
+COPY apps/api/prisma apps/api/prisma
+RUN npm ci --omit=dev --omit=optional -w @semantic/api --no-audit --no-fund \
+  && npm exec -w @semantic/api -- prisma generate \
+  && rm -rf /root/.npm /root/.cache
 COPY --from=build /app/packages/contracts/dist packages/contracts/dist
 COPY --from=build /app/apps/api/dist apps/api/dist
 WORKDIR /app/apps/api
