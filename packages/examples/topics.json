@@ -29,7 +29,7 @@
   {
     "title": "US Congress elections",
     "query": "2026 US midterm elections House and Senate forecast",
-    "article": { "site": "US Polling Data", "url": "https://uspollingdata.com/news/midterm-forecast-2026/" },
+    "article": { "site": "Election Central", "url": "https://www.uspresidentialelectionnews.com/2026-midterm-elections/" },
     "competitors": [
       { "site": "Race to the WH · House", "url": "https://www.racetothewh.com/house" },
       { "site": "Race to the WH · Senate", "url": "https://racetothewh.com/senate/26" }
