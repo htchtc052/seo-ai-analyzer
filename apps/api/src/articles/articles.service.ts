@@ -15,7 +15,7 @@ export class ArticlesService {
     private readonly webPages: WebPageService,
   ) {}
 
-  async import(url: string): Promise<Article> {
+  async importArticle(url: string): Promise<Article> {
     const extracted = await this.webPages.readArticle(url);
     if (!extracted) throw new ArticleImportException('Could not find article text on the page');
 
@@ -30,7 +30,7 @@ export class ArticlesService {
     return toArticle(await this.articles.create({ sourceUrl: url, ...extracted }));
   }
 
-  async findById(id: string): Promise<Article> {
+  async getArticle(id: string): Promise<Article> {
     const article = await this.articles.findById(id);
     if (!article) throw new NotFoundException({ code: 'ARTICLE_NOT_FOUND', message: 'Article not found' });
     return toArticle(article);

@@ -20,30 +20,30 @@ export class AnalysisController {
   @Post()
   @ResponseSchema(analysisRunResponseSchema)
   async start(@Body(new ZodValidationPipe(analysisRequestSchema)) input: AnalysisRequest) {
-    return { run: await this.analysis.start(input) };
+    return { run: await this.analysis.startAnalysis(input) };
   }
 
   @Get()
   @ResponseSchema(analysisRunListSchema)
   async findRecent() {
-    return { runs: await this.analysis.findRecent() };
+    return { runs: await this.analysis.listRecentRuns() };
   }
 
   @Get('features')
   @ResponseSchema(featuresResponseSchema)
   features() {
-    return { features: this.analysis.features() };
+    return { features: this.analysis.getFeatures() };
   }
 
   @Get(':id')
   @ResponseSchema(analysisRunResponseSchema)
   async findById(@Param('id') id: string) {
-    return { run: await this.analysis.findById(id) };
+    return { run: await this.analysis.getRun(id) };
   }
 
   @Delete(':id')
   @HttpCode(204)
   async delete(@Param('id') id: string) {
-    await this.analysis.delete(id);
+    await this.analysis.deleteRun(id);
   }
 }

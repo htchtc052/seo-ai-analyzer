@@ -18,12 +18,12 @@ export class ArticlesController {
   @Post('import')
   @ResponseSchema(articleResponseSchema)
   async import(@Body(new ZodValidationPipe(articleImportRequestSchema)) input: ArticleImportRequest) {
-    return { article: await this.articles.import(input.url) };
+    return { article: await this.articles.importArticle(input.url) };
   }
 
   @Get(':id')
   @ResponseSchema(articleResponseSchema)
   async findById(@Param('id') id: string) {
-    return { article: await this.articles.findById(id) };
+    return { article: await this.articles.getArticle(id) };
   }
 }
