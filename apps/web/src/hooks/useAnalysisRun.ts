@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { AnalysisRun, FragmentScore } from '@semantic/contracts';
 import { getAnalysisRun } from '@/lib/api';
+import { getRecommendationStatus } from '@/lib/recommendation-status';
 
 const POLL_INTERVAL_MS = 2000;
 
@@ -16,15 +17,8 @@ function groupBySection(fragments: FragmentScore[]): ScoredSection[] {
   return sections;
 }
 
-export type RecommendationStatus = 'not-requested' | 'queued' | 'writing' | 'ready' | 'failed' | 'job-missing';
-
-function getRecommendationStatus(run: AnalysisRun): RecommendationStatus {
-  if (run.competitors.length === 0) return 'not-requested';
-  if (run.recommendations.length > 0) return 'ready';
-  if (!run.recommendationJob) return 'job-missing';
-  if (run.recommendationJob.state === 'failed') return 'failed';
-  if (run.recommendationJob.state === 'active') return 'writing';
-  return 'queued';
+function statusOf(run: AnalysisRun) {
+  return getRecommendationStatus(run.competitors.length, run);
 }
 
 export function useAnalysisRun(id: string) {
@@ -36,8 +30,7 @@ export function useAnalysisRun(id: string) {
     let timer: number | undefined;
     const load = () => getAnalysisRun(id, controller.signal).then(next => {
       setRun(next);
-      const status = getRecommendationStatus(next);
-      if (status === 'queued' || status === 'writing') timer = window.setTimeout(load, POLL_INTERVAL_MS);
+      if (statusOf(next) === 'pending') timer = window.setTimeout(load, POLL_INTERVAL_MS);
     }).catch(err => { if (!controller.signal.aborted) setError(err.message); });
     load();
     return () => { controller.abort(); window.clearTimeout(timer); };
@@ -46,7 +39,7 @@ export function useAnalysisRun(id: string) {
   return {
     run,
     error,
-    recommendationStatus: run && getRecommendationStatus(run),
+    recommendationStatus: run && statusOf(run),
     sections: run && groupBySection(run.fragments),
   };
 }

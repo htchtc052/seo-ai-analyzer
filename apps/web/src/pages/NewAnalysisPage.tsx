@@ -1,4 +1,4 @@
-import { ArticleFetch } from '@/components/articles/ArticleFetch';
+import { ArticleField } from '@/components/articles/ArticleField';
 import { ExampleTopic } from '@/components/articles/ExampleTopic';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,11 @@ const hints: Record<AnalysisHint, string> = {
 
 export function NewAnalysisPage() {
   const {
-    features, topics, topic, selectTopic, articleUrl, setArticleUrl, competitorUrls, changeCompetitorUrl,
-    article, selectArticle, competitors, selectCompetitor, hint, form, submit, error,
+    features, topics, topic, selectTopic, main, changeMainUrl, competitors, changeCompetitorUrl,
+    fetchArticles, canFetch, isLoading, canRun, hint, form, submit, error,
   } = useNewAnalysis();
   const { register, formState: { errors, isSubmitting } } = form;
+  const locked = isLoading || isSubmitting;
 
   if (!features || !hint) {
     return error
@@ -32,30 +33,17 @@ export function NewAnalysisPage() {
       <CardHeader><CardTitle>Articles</CardTitle></CardHeader>
       <CardContent>
         <FieldGroup>
-          <Field key={topic.title}>
-            <ArticleFetch
-              label="Your article"
-              url={articleUrl}
-              onUrlChange={setArticleUrl}
-              article={article}
-              disabled={isSubmitting}
-              onChange={selectArticle}
-            >
-              <ExampleTopic topics={topics} topic={topic} disabled={isSubmitting} onSelect={selectTopic} />
-            </ArticleFetch>
+          <Field>
+            <ArticleField label="Your article" slot={main} disabled={locked} onUrlChange={changeMainUrl}>
+              <ExampleTopic topics={topics} topic={topic} disabled={locked} onSelect={selectTopic} />
+            </ArticleField>
             <FieldError errors={[errors.articleId]} />
           </Field>
-          {features.recommendations && competitorUrls.map((url, index) => <Field key={`${topic.title}-${index}`}>
-            <ArticleFetch
-              label={`Competitor ${index + 1} (optional)`}
-              url={url}
-              onUrlChange={url => changeCompetitorUrl(index, url)}
-              article={competitors[index]}
-              disabled={isSubmitting}
-              onChange={next => selectCompetitor(index, next)}
-            />
+          {competitors.map((slot, index) => <Field key={index}>
+            <ArticleField label={`Competitor ${index + 1} (optional)`} slot={slot} disabled={locked} onUrlChange={url => changeCompetitorUrl(index, url)} />
           </Field>)}
           {features.recommendations && <FieldError errors={[errors.competitorIds]} />}
+          <Button type="button" variant="secondary" disabled={!canFetch} onClick={fetchArticles}>{isLoading ? 'Fetching…' : 'Fetch articles'}</Button>
         </FieldGroup>
       </CardContent>
     </Card>
@@ -84,7 +72,7 @@ export function NewAnalysisPage() {
             <FieldError errors={[errors.niche]} />
           </Field>
           <Field>
-            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Scoring…' : 'Run analysis'}</Button>
+            <Button type="submit" disabled={!canRun}>{isSubmitting ? 'Scoring…' : 'Run analysis'}</Button>
             <FieldDescription>
               {hints[hint]}
             </FieldDescription>

@@ -56,6 +56,7 @@ export const analysisRunSummarySchema = z.object({
   overallScore: z.number().min(-1).max(1),
   competitorCount: z.number().int().min(0),
   recommendations: z.array(z.string()),
+  recommendationJob: recommendationJobSchema.nullable(),
   createdAt: z.iso.datetime(),
 });
 
@@ -66,7 +67,6 @@ export const analysisRunSchema = analysisRunSummarySchema.omit({ competitorCount
   niche: z.string(),
   fragments: z.array(fragmentScoreSchema).min(1),
   missingEntities: z.array(z.string()),
-  recommendationJob: recommendationJobSchema.nullable(),
 });
 
 export const analysisRunResponseSchema = z.object({ run: analysisRunSchema });

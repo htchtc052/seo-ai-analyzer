@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import type { AnalysisRunSummary } from '@semantic/contracts';
 import { deleteAnalysisRun, getAnalysisRuns } from '@/lib/api';
+import { getRecommendationStatus } from '@/lib/recommendation-status';
 
-export type AnalysisRunResult = 'scores-only' | 'recommendations-ready' | 'recommendations-pending';
+const POLL_INTERVAL_MS = 2000;
 
-function getResult(run: AnalysisRunSummary): AnalysisRunResult {
-  if (run.competitorCount === 0) return 'scores-only';
-  if (run.recommendations.length > 0) return 'recommendations-ready';
-  return 'recommendations-pending';
+function statusOf(run: AnalysisRunSummary) {
+  return getRecommendationStatus(run.competitorCount, run);
 }
 
 export function useAnalysisRuns() {
@@ -16,10 +15,13 @@ export function useAnalysisRuns() {
 
   useEffect(() => {
     const controller = new AbortController();
-    getAnalysisRuns(controller.signal).then(setRuns).catch(err => {
-      if (!controller.signal.aborted) setError(err.message);
-    });
-    return () => controller.abort();
+    let timer: number | undefined;
+    const load = () => getAnalysisRuns(controller.signal).then(next => {
+      setRuns(next);
+      if (next.some(run => statusOf(run) === 'pending')) timer = window.setTimeout(load, POLL_INTERVAL_MS);
+    }).catch(err => { if (!controller.signal.aborted) setError(err.message); });
+    load();
+    return () => { controller.abort(); window.clearTimeout(timer); };
   }, []);
 
   async function deleteRun(id: string) {
@@ -32,5 +34,5 @@ export function useAnalysisRuns() {
     }
   }
 
-  return { rows: runs?.map(run => ({ run, result: getResult(run) })), error, deleteRun };
+  return { rows: runs?.map(run => ({ run, status: statusOf(run) })), error, deleteRun };
 }

@@ -27,10 +27,10 @@ export function AnalysisRunPage() {
         <h3 className="font-semibold">Overall relevance: <span className="text-primary tabular-nums">{run.overallScore.toFixed(2)}</span></h3>
         <ScoreChart sections={sections} />
       </section>
-      {recommendationStatus === 'not-requested' && <p className="text-sm text-muted-foreground">No competitors were added, so recommendations were not requested.</p>}
-      {recommendationStatus === 'failed' && <Alert variant="destructive"><AlertDescription>{run.recommendationJob?.failedReason}</AlertDescription></Alert>}
+      {recommendationStatus === 'scores-only' && <p className="text-sm text-muted-foreground">No competitors were added, so recommendations were not requested.</p>}
+      {recommendationStatus === 'failed' && <Alert variant="destructive"><AlertDescription>{run.recommendationJob?.failedReason ?? 'The recommendation job is no longer available.'}</AlertDescription></Alert>}
       {recommendationStatus === 'ready' && <>
-        {run.missingEntities.length > 0 && <TextList title="Missing topics" items={run.missingEntities} />}
+        {run.missingEntities.length > 0 && <TextList title="Suggested missing topics" items={run.missingEntities} />}
         <TextList title="Recommendations" items={run.recommendations} />
       </>}
     </CardContent>

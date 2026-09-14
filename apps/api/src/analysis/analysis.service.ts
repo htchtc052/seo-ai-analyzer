@@ -49,7 +49,7 @@ export class AnalysisService {
     const scores = await this.relevance.score(input.query, fragments.map((fragment) => fragment.text));
     const run = await this.runs.create(input, scores);
     if (input.competitorIds.length > 0) {
-      await this.queue.add('recommend', { runId: run.id }, { jobId: run.id });
+      await this.queue.add('recommend', { runId: run.id }, { jobId: run.id, attempts: 1 });
     }
     return this.findById(run.id);
   }
@@ -79,7 +79,10 @@ export class AnalysisService {
 
   async findRecent(): Promise<AnalysisRunSummary[]> {
     const runs = await this.runs.findRecent();
-    return runs.map(toSummary);
+    return Promise.all(runs.map(async (run) => toSummary(
+      run,
+      run._count.competitors > 0 ? await this.findRecommendationJob(run.id) : null,
+    )));
   }
 
   async delete(id: string): Promise<void> {
@@ -135,7 +138,7 @@ function average(scores: number[]): number {
   return scores.reduce((sum, score) => sum + score, 0) / scores.length;
 }
 
-function toSummary(run: AnalysisRunListRow): AnalysisRunSummary {
+function toSummary(run: AnalysisRunListRow, recommendationJob: RecommendationJob | null): AnalysisRunSummary {
   return {
     id: run.id,
     article: run.article,
@@ -143,6 +146,7 @@ function toSummary(run: AnalysisRunListRow): AnalysisRunSummary {
     overallScore: average(run.scores),
     competitorCount: run._count.competitors,
     recommendations: run.recommendations,
+    recommendationJob,
     createdAt: run.createdAt.toISOString(),
   };
 }

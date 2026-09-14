@@ -38,5 +38,7 @@ ${fragmentLines}
 Competitor articles on the same topic:
 ${competitorBlocks || 'none available'}
 
-List entities or topics the competitor articles cover that this article is missing, and give concrete, actionable recommendations to improve this article's relevance to the target query.`;
+Return two lists.
+missingEntities: short topic names, not questions, for topics covered by the competitor articles above that this article does not cover. Treat a topic as covered when the article discusses the same meaning in different words. If there are no such topics, return an empty array.
+recommendations: concrete, actionable improvements to this article's relevance to the target query, including general suggestions that are not tied to competitors.`;
 }
