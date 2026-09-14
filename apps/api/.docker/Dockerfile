@@ -11,13 +11,13 @@ FROM base AS build
 RUN npm ci --no-audit --no-fund
 COPY packages/contracts packages/contracts
 COPY apps/api apps/api
-RUN npm run build -w @semantic/contracts && npm run build -w @semantic/api
+RUN npm run build -w @seo-ai-analyzer/contracts && npm run build -w @seo-ai-analyzer/api
 
 FROM base
 ENV NODE_ENV=production
 COPY apps/api/prisma apps/api/prisma
-RUN npm ci --omit=dev --omit=optional -w @semantic/api --no-audit --no-fund \
-  && npm exec -w @semantic/api -- prisma generate \
+RUN npm ci --omit=dev --omit=optional -w @seo-ai-analyzer/api --no-audit --no-fund \
+  && npm exec -w @seo-ai-analyzer/api -- prisma generate \
   && rm -rf /root/.npm /root/.cache
 COPY --from=build /app/packages/contracts/dist packages/contracts/dist
 COPY --from=build /app/apps/api/dist apps/api/dist

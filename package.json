@@ -1,20 +1,26 @@
 {
-  "name": "react-linkedin",
+  "name": "seo-ai-analyzer",
   "version": "1.0.0",
   "type": "module",
-  "workspaces": ["apps/*", "packages/*"],
-  "engines": { "node": ">=24.0.0" },
-  "scripts": {
-    "predev": "npm run build -w @semantic/contracts",
-    "dev": "concurrently -k -n contracts,api,web \"npm run dev -w @semantic/contracts\" \"npm run dev -w @semantic/api\" \"npm run dev -w @semantic/web\"",
-    "build": "npm run build -w @semantic/contracts && npm run build -w @semantic/api && npm run build -w @semantic/web",
-    "typecheck": "npm run build -w @semantic/contracts && npm run typecheck --workspaces --if-present",
-    "test": "npm run build -w @semantic/contracts && npm run test --workspaces --if-present"
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
   },
-  "dependencies": {},
+  "scripts": {
+    "predev": "npm run build -w @seo-ai-analyzer/contracts",
+    "dev": "concurrently -k -n contracts,api,web \"npm run dev -w @seo-ai-analyzer/contracts\" \"npm run dev -w @seo-ai-analyzer/api\" \"npm run dev -w @seo-ai-analyzer/web\"",
+    "build": "npm run build -w @seo-ai-analyzer/contracts && npm run build -w @seo-ai-analyzer/api && npm run build -w @seo-ai-analyzer/web",
+    "typecheck": "npm run build -w @seo-ai-analyzer/contracts && npm run typecheck --workspaces --if-present",
+    "test": "npm run build -w @seo-ai-analyzer/contracts && npm run test --workspaces --if-present",
+    "format": "prettier --write apps/api/src apps/web/src packages/contracts/src"
+  },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "private": true
 }

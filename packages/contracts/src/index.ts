@@ -24,10 +24,10 @@ export const articleResponseSchema = z.object({ article: articleSchema });
 export const analysisRequestSchema = z.object({
   articleId: z.string().trim().min(1, 'Fetch the article first'),
   query: z.string().trim().min(1, 'Enter a target query').max(500),
-  competitorIds: z.array(z.string().min(1)).max(2).refine(
-    (ids) => new Set(ids).size === ids.length,
-    'Competitors must be different articles',
-  ),
+  competitorIds: z
+    .array(z.string().min(1))
+    .max(2)
+    .refine((ids) => new Set(ids).size === ids.length, 'Competitors must be different articles'),
   audience: z.string().trim().max(1000),
   purpose: z.string().trim().max(1000),
   niche: z.string().trim().max(1000),
@@ -76,7 +76,11 @@ export const featuresSchema = z.object({ recommendations: z.boolean() });
 export const featuresResponseSchema = z.object({ features: featuresSchema });
 
 export const apiErrorSchema = z.object({
-  error: z.object({ code: z.string(), message: z.string(), fields: z.record(z.string(), z.array(z.string())).optional() }),
+  error: z.object({
+    code: z.string(),
+    message: z.string(),
+    fields: z.record(z.string(), z.array(z.string())).optional(),
+  }),
 });
 
 export type Article = z.infer<typeof articleSchema>;

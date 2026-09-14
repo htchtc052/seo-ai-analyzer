@@ -9,6 +9,15 @@
     ]
   },
   {
+    "title": "Лето в Москве",
+    "query": "куда сходить летом в Москве 2026",
+    "article": { "site": "Афиша Daily", "url": "https://daily.afisha.ru/cities/32287-budet-zharko-kuda-hodit-chto-delat-i-gde-est-v-moskve-letom-2026/" },
+    "competitors": [
+      { "site": "Досугатор", "url": "https://dosugator.ru/articles/leto-v-moskve-2026/" },
+      { "site": "Афиша Daily · Лето в Москве", "url": "https://daily.afisha.ru/cities/32270-30-maya-startuet-proekt-leto-v-moskve/" }
+    ]
+  },
+  {
     "title": "Junior developer jobs",
     "query": "junior developer job market 2026",
     "article": { "site": "Danilchenko", "url": "https://www.danilchenko.dev/posts/junior-developer-jobs-2026/" },

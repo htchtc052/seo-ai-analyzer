@@ -1,11 +1,4 @@
-import {
-  ArgumentsHost,
-  Catch,
-  HttpException,
-  HttpStatus,
-  Inject,
-  type ExceptionFilter,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, HttpException, HttpStatus, Inject, type ExceptionFilter } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 
 type ErrorBody = {
@@ -23,21 +16,14 @@ export class ApiExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse();
-    const status = exception instanceof HttpException
-      ? exception.getStatus()
-      : HttpStatus.INTERNAL_SERVER_ERROR;
+    const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    this.adapterHost.httpAdapter.reply(
-      response,
-      { error: toErrorBody(exception, status) },
-      status,
-    );
+    this.adapterHost.httpAdapter.reply(response, { error: toErrorBody(exception, status) }, status);
   }
 }
 
 function toErrorBody(exception: unknown, status: number): ErrorBody {
-  const fallbackCode =
-    status === HttpStatus.INTERNAL_SERVER_ERROR ? 'INTERNAL_ERROR' : `HTTP_${status}`;
+  const fallbackCode = status === HttpStatus.INTERNAL_SERVER_ERROR ? 'INTERNAL_ERROR' : `HTTP_${status}`;
 
   if (!(exception instanceof HttpException)) {
     return { code: fallbackCode, message: 'Unexpected server error' };

@@ -1,4 +1,4 @@
-import type { AnalysisRunSummary, RecommendationJob } from '@semantic/contracts';
+import type { AnalysisRunSummary, RecommendationJob } from '@seo-ai-analyzer/contracts';
 
 export type RecommendationStatus = 'scores-only' | 'pending' | 'ready' | 'failed';
 

@@ -1,4 +1,4 @@
-import topics from '@semantic/examples/topics.json' with { type: 'json' };
+import topics from '@seo-ai-analyzer/examples/topics.json' with { type: 'json' };
 
 const api = process.env.SMOKE_API_URL ?? 'http://127.0.0.1:3001/api';
 

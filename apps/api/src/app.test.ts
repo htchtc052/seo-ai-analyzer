@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { analysisRunListSchema } from '@semantic/contracts';
+import { analysisRunListSchema } from '@seo-ai-analyzer/contracts';
 import { createApplication } from './bootstrap.js';
 
 test('article import and analysis boundaries', async () => {
@@ -10,18 +10,26 @@ test('article import and analysis boundaries', async () => {
   const address = app.getHttpServer().address();
   assert(address && typeof address !== 'string');
   const base = `http://127.0.0.1:${address.port}/api`;
-  const post = (path: string, body: unknown) => fetch(`${base}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  const post = (path: string, body: unknown) =>
+    fetch(`${base}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
 
   try {
     assert.equal((await post('/articles/import', { url: 'ftp://example.com/article' })).status, 400);
 
     assert.equal((await fetch(`${base}/articles/missing`)).status, 404);
 
-    const analysis = { articleId: 'missing', query: 'junior developer jobs', competitorIds: [], audience: '', purpose: '', niche: '' };
+    const analysis = {
+      articleId: 'missing',
+      query: 'junior developer jobs',
+      competitorIds: [],
+      audience: '',
+      purpose: '',
+      niche: '',
+    };
     assert.equal((await post('/analyses', { ...analysis, query: '  ' })).status, 400);
     assert.equal((await post('/analyses', { ...analysis, competitorIds: ['a', 'b', 'c'] })).status, 400);
     assert.equal((await post('/analyses', { ...analysis, competitorIds: ['a', 'a'] })).status, 400);

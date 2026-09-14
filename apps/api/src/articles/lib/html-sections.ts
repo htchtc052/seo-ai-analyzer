@@ -1,5 +1,5 @@
 import { Readability } from '@mozilla/readability';
-import type { ArticleSection } from '@semantic/contracts';
+import type { ArticleSection } from '@seo-ai-analyzer/contracts';
 import { parseHTML } from 'linkedom';
 
 const TEXT_BLOCKS = 'h2, h3, p, li, blockquote, pre, div';

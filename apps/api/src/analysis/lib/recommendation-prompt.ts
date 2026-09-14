@@ -1,4 +1,4 @@
-import type { ArticleSection, FragmentScore } from '@semantic/contracts';
+import type { ArticleSection, FragmentScore } from '@seo-ai-analyzer/contracts';
 
 export type RecommendationPromptInput = {
   query: string;
@@ -12,7 +12,10 @@ export type RecommendationPromptInput = {
 
 export function buildRecommendationPrompt(input: RecommendationPromptInput): string {
   const fragmentLines = input.fragments
-    .map((fragment) => `- [${fragment.score.toFixed(2)}] ${fragment.heading ? `${fragment.heading}: ` : ''}${fragment.text}`)
+    .map(
+      (fragment) =>
+        `- [${fragment.score.toFixed(2)}] ${fragment.heading ? `${fragment.heading}: ` : ''}${fragment.text}`,
+    )
     .join('\n');
 
   const competitorBlocks = input.competitors
@@ -40,5 +43,6 @@ ${competitorBlocks || 'none available'}
 
 Return two lists.
 missingEntities: short topic names, not questions, for topics covered by the competitor articles above that this article does not cover. Treat a topic as covered when the article discusses the same meaning in different words. If there are no such topics, return an empty array.
-recommendations: concrete, actionable improvements to this article's relevance to the target query, including general suggestions that are not tied to competitors.`;
+recommendations: concrete, actionable improvements to this article's relevance to the target query, including general suggestions that are not tied to competitors.
+Write both lists in the language of the article.`;
 }

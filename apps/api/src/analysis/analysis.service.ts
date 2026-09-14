@@ -9,7 +9,7 @@ import type {
   Features,
   FragmentScore,
   RecommendationJob,
-} from '@semantic/contracts';
+} from '@seo-ai-analyzer/contracts';
 import { ArticlesService } from '../articles/articles.service.js';
 import { ANALYSIS_QUEUE, type AnalysisJob } from './lib/analysis-queue.js';
 import { AnalysisRunsRepository } from './analysis-runs.repository.js';
@@ -46,7 +46,10 @@ export class AnalysisService {
     await Promise.all(input.competitorIds.map((id) => this.articles.findById(id)));
 
     const fragments = flattenFragments(article.sections);
-    const scores = await this.relevance.score(input.query, fragments.map((fragment) => fragment.text));
+    const scores = await this.relevance.score(
+      input.query,
+      fragments.map((fragment) => fragment.text),
+    );
     const run = await this.runs.create(input, scores);
     if (input.competitorIds.length > 0) {
       await this.queue.add('recommend', { runId: run.id }, { jobId: run.id, attempts: 1 });
@@ -79,10 +82,11 @@ export class AnalysisService {
 
   async findRecent(): Promise<AnalysisRunSummary[]> {
     const runs = await this.runs.findRecent();
-    return Promise.all(runs.map(async (run) => toSummary(
-      run,
-      run._count.competitors > 0 ? await this.findRecommendationJob(run.id) : null,
-    )));
+    return Promise.all(
+      runs.map(async (run) =>
+        toSummary(run, run._count.competitors > 0 ? await this.findRecommendationJob(run.id) : null),
+      ),
+    );
   }
 
   async delete(id: string): Promise<void> {

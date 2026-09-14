@@ -6,7 +6,4 @@ import type { AppConfig } from './config/config.schema.js';
 const app = await createApplication();
 const config = app.get(ConfigService<AppConfig, true>);
 
-await app.listen(
-  config.get('API_PORT', { infer: true }),
-  config.get('API_HOST', { infer: true }),
-);
+await app.listen(config.get('API_PORT', { infer: true }), config.get('API_HOST', { infer: true }));

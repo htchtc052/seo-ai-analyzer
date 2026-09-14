@@ -13,7 +13,7 @@
 docker compose -f docker-compose.dev.yml up -d
 cp apps/api/.env.example apps/api/.env
 npm ci
-npm run db:migrate -w @semantic/api
+npm run db:migrate -w @seo-ai-analyzer/api
 npm run dev
 ```
 
@@ -29,4 +29,4 @@ npm run build
 
 `npm test` ходит в Postgres и Redis из `docker-compose.dev.yml`; модели и интернет не нужны.
 
-`npm run smoke:import -w @semantic/api` прогоняет импорт реальных страниц через запущенный API. Результат зависит от доступности сайтов.
+`npm run smoke:import -w @seo-ai-analyzer/api` прогоняет импорт реальных страниц через запущенный API. Результат зависит от доступности сайтов.

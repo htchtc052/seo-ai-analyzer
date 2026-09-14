@@ -3,7 +3,7 @@ import {
   articleImportRequestSchema,
   articleResponseSchema,
   type ArticleImportRequest,
-} from '@semantic/contracts';
+} from '@seo-ai-analyzer/contracts';
 import { ResponseSchema } from '../common/response-schema.decorator.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 import { ArticlesService } from './articles.service.js';
@@ -17,9 +17,7 @@ export class ArticlesController {
 
   @Post('import')
   @ResponseSchema(articleResponseSchema)
-  async import(
-    @Body(new ZodValidationPipe(articleImportRequestSchema)) input: ArticleImportRequest,
-  ) {
+  async import(@Body(new ZodValidationPipe(articleImportRequestSchema)) input: ArticleImportRequest) {
     return { article: await this.articles.import(input.url) };
   }
 

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { ArticleSection } from '@semantic/contracts';
+import type { ArticleSection } from '@seo-ai-analyzer/contracts';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()

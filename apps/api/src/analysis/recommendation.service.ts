@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { recommendationSchema, type Recommendation } from '@semantic/contracts';
+import { recommendationSchema, type Recommendation } from '@seo-ai-analyzer/contracts';
 import { LlmService } from '../llm/llm.service.js';
 import { buildRecommendationPrompt, type RecommendationPromptInput } from './lib/recommendation-prompt.js';
 

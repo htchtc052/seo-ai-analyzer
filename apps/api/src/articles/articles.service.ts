@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { Article, ArticleSection } from '@semantic/contracts';
+import type { Article, ArticleSection } from '@seo-ai-analyzer/contracts';
 import { WebPageService } from '../web-page/web-page.service.js';
 import { importFailed } from './lib/article-import-failed.js';
 import { ArticlesRepository } from './articles.repository.js';

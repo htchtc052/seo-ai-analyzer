@@ -12,19 +12,8 @@ import { RecommendationService } from './recommendation.service.js';
 import { RelevanceService } from './relevance.service.js';
 
 @Module({
-  imports: [
-    ArticlesModule,
-    LlmModule,
-    PrismaModule,
-    BullModule.registerQueue({ name: ANALYSIS_QUEUE }),
-  ],
+  imports: [ArticlesModule, LlmModule, PrismaModule, BullModule.registerQueue({ name: ANALYSIS_QUEUE })],
   controllers: [AnalysisController],
-  providers: [
-    AnalysisService,
-    AnalysisRunsRepository,
-    AnalysisProcessor,
-    RelevanceService,
-    RecommendationService,
-  ],
+  providers: [AnalysisService, AnalysisRunsRepository, AnalysisProcessor, RelevanceService, RecommendationService],
 })
 export class AnalysisModule {}

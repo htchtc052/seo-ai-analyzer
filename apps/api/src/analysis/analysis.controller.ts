@@ -5,7 +5,7 @@ import {
   analysisRunResponseSchema,
   featuresResponseSchema,
   type AnalysisRequest,
-} from '@semantic/contracts';
+} from '@seo-ai-analyzer/contracts';
 import { ResponseSchema } from '../common/response-schema.decorator.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 import { AnalysisService } from './analysis.service.js';
@@ -19,9 +19,7 @@ export class AnalysisController {
 
   @Post()
   @ResponseSchema(analysisRunResponseSchema)
-  async start(
-    @Body(new ZodValidationPipe(analysisRequestSchema)) input: AnalysisRequest,
-  ) {
+  async start(@Body(new ZodValidationPipe(analysisRequestSchema)) input: AnalysisRequest) {
     return { run: await this.analysis.start(input) };
   }
 

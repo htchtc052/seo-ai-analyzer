@@ -1,5 +1,5 @@
 {
-  "name": "@semantic/api",
+  "name": "@seo-ai-analyzer/api",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -23,7 +23,7 @@
     "@nestjs/core": "^12.0.1",
     "@nestjs/platform-fastify": "^12.0.1",
     "@prisma/client": "6.19.3",
-    "@semantic/contracts": "*",
+    "@seo-ai-analyzer/contracts": "*",
     "bullmq": "^6.3.4",
     "ioredis": "^6.0.0",
     "linkedom": "^0.18.13",
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",
-    "@semantic/examples": "*",
+    "@seo-ai-analyzer/examples": "*",
     "@types/node": "^24.0.0",
     "tsx": "^4.20.0"
   }

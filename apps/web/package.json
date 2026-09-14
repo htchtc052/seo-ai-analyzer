@@ -1,5 +1,5 @@
 {
-  "name": "@semantic/web",
+  "name": "@seo-ai-analyzer/web",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
-    "@semantic/contracts": "*",
-    "@semantic/examples": "*",
+    "@seo-ai-analyzer/contracts": "*",
+    "@seo-ai-analyzer/examples": "*",
     "@tailwindcss/vite": "^4.3.3",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.0",

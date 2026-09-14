@@ -5,7 +5,7 @@ import {
   articleResponseSchema,
   featuresResponseSchema,
   type AnalysisRequest,
-} from '@semantic/contracts';
+} from '@seo-ai-analyzer/contracts';
 
 async function request(path: string, options?: RequestInit) {
   const response = await fetch(`/api${path}`, options);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { AnalysisRun, FragmentScore } from '@semantic/contracts';
+import type { AnalysisRun, FragmentScore } from '@seo-ai-analyzer/contracts';
 import { getAnalysisRun } from '@/lib/api';
 import { getRecommendationStatus } from '@/lib/recommendation-status';
 
@@ -28,12 +28,20 @@ export function useAnalysisRun(id: string) {
   useEffect(() => {
     const controller = new AbortController();
     let timer: number | undefined;
-    const load = () => getAnalysisRun(id, controller.signal).then(next => {
-      setRun(next);
-      if (statusOf(next) === 'pending') timer = window.setTimeout(load, POLL_INTERVAL_MS);
-    }).catch(err => { if (!controller.signal.aborted) setError(err.message); });
+    const load = () =>
+      getAnalysisRun(id, controller.signal)
+        .then((next) => {
+          setRun(next);
+          if (statusOf(next) === 'pending') timer = window.setTimeout(load, POLL_INTERVAL_MS);
+        })
+        .catch((err) => {
+          if (!controller.signal.aborted) setError(err.message);
+        });
     load();
-    return () => { controller.abort(); window.clearTimeout(timer); };
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
   }, [id]);
 
   return {

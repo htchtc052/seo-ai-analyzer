@@ -51,7 +51,7 @@ jobs:
 
       - run: npm run typecheck
 
-      - run: npm exec -w @semantic/api -- prisma migrate deploy
+      - run: npm exec -w @seo-ai-analyzer/api -- prisma migrate deploy
 
       - run: npm test
 

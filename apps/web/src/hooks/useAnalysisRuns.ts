@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { AnalysisRunSummary } from '@semantic/contracts';
+import type { AnalysisRunSummary } from '@seo-ai-analyzer/contracts';
 import { deleteAnalysisRun, getAnalysisRuns } from '@/lib/api';
 import { getRecommendationStatus } from '@/lib/recommendation-status';
 
@@ -16,23 +16,31 @@ export function useAnalysisRuns() {
   useEffect(() => {
     const controller = new AbortController();
     let timer: number | undefined;
-    const load = () => getAnalysisRuns(controller.signal).then(next => {
-      setRuns(next);
-      if (next.some(run => statusOf(run) === 'pending')) timer = window.setTimeout(load, POLL_INTERVAL_MS);
-    }).catch(err => { if (!controller.signal.aborted) setError(err.message); });
+    const load = () =>
+      getAnalysisRuns(controller.signal)
+        .then((next) => {
+          setRuns(next);
+          if (next.some((run) => statusOf(run) === 'pending')) timer = window.setTimeout(load, POLL_INTERVAL_MS);
+        })
+        .catch((err) => {
+          if (!controller.signal.aborted) setError(err.message);
+        });
     load();
-    return () => { controller.abort(); window.clearTimeout(timer); };
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
   }, []);
 
   async function deleteRun(id: string) {
     setError('');
     try {
       await deleteAnalysisRun(id);
-      setRuns(current => current?.filter(run => run.id !== id));
+      setRuns((current) => current?.filter((run) => run.id !== id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not delete the analysis');
     }
   }
 
-  return { rows: runs?.map(run => ({ run, status: statusOf(run) })), error, deleteRun };
+  return { rows: runs?.map((run) => ({ run, status: statusOf(run) })), error, deleteRun };
 }

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { AnalysisRequest, Recommendation } from '@semantic/contracts';
+import type { AnalysisRequest, Recommendation } from '@seo-ai-analyzer/contracts';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 const articleRef = { select: { id: true, sourceUrl: true, title: true } };

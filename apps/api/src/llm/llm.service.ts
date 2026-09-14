@@ -44,7 +44,9 @@ export class LlmService {
         json_schema: { name, strict: true, schema: z.toJSONSchema(schema) },
       },
     });
-    this.logger.log(`${this.chatModel} tokens: prompt ${completion.usage?.prompt_tokens}, completion ${completion.usage?.completion_tokens}`);
+    this.logger.log(
+      `${this.chatModel} tokens: prompt ${completion.usage?.prompt_tokens}, completion ${completion.usage?.completion_tokens}`,
+    );
     const content = completion.choices[0]?.message.content;
     if (!content) throw new Error(`LLM returned no content (finish reason: ${completion.choices[0]?.finish_reason})`);
     return schema.parse(JSON.parse(content));
