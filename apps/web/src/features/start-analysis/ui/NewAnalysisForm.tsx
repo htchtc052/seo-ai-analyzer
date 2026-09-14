@@ -1,3 +1,4 @@
+import { Download, LoaderCircle, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
@@ -79,7 +80,8 @@ export function NewAnalysisForm() {
               </Field>
             ))}
             {features.recommendations && <FieldError errors={[errors.competitorIds]} />}
-            <Button type="button" variant="secondary" disabled={!canFetch} onClick={fetchArticles}>
+            <Button type="button" disabled={!canFetch} onClick={fetchArticles}>
+              {isFetching ? <LoaderCircle className="animate-spin" /> : <Download />}
               {isFetching ? 'Fetching…' : 'Fetch articles'}
             </Button>
           </FieldGroup>
@@ -137,6 +139,7 @@ export function NewAnalysisForm() {
             </Field>
             <Field>
               <Button type="submit" disabled={locked}>
+                {isStarting ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
                 {isStarting ? 'Scoring…' : 'Run analysis'}
               </Button>
               <FieldDescription>{hints[hint]}</FieldDescription>
