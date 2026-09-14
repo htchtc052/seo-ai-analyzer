@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router';
 import { analysisRequestSchema, type Article, type Features } from '@semantic/contracts';
@@ -50,7 +50,6 @@ export function useNewAnalysis() {
     defaultValues: { articleId: '', query: '', competitorIds: [], audience: '', purpose: '', niche: '' },
   });
   const { isSubmitting, isSubmitted } = form.formState;
-  const values = useWatch({ control: form.control });
   const activeCompetitors = features?.recommendations ? competitors : [];
 
   useEffect(() => {
@@ -119,7 +118,7 @@ export function useNewAnalysis() {
     fetchArticles,
     canFetch: !isLoading && !isSubmitting && [main, ...activeCompetitors].some(needsFetch),
     isLoading,
-    canRun: analysisRequestSchema.safeParse(values).success && !isLoading && !isSubmitting,
+    canRun: !isLoading && !isSubmitting,
     hint: features && getHint(features, activeCompetitors),
     form,
     submit,
