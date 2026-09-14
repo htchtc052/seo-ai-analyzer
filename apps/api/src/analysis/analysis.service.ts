@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
@@ -13,13 +14,12 @@ import {
 import { ArticlesService } from '../articles/articles.service.js';
 import { LlmService } from '../llm/llm.service.js';
 import { AnalysisRunsRepository } from './analysis-runs.repository.js';
-import { ANALYSIS_QUEUE, type AnalysisJob } from './lib/analysis-queue.js';
-import { similaritiesToFirst } from './lib/cosine-similarity.js';
-import { flattenFragments } from './lib/fragments.js';
-import { buildRecommendationPrompt } from './lib/recommendation-prompt.js';
+import { ANALYSIS_QUEUE, type AnalysisJob } from './constants/analysis.constants.js';
+import { RelevanceService } from './relevance.service.js';
+
+const recommendationPrompt = readFileSync(new URL('./prompts/recommendation.md', import.meta.url), 'utf8');
 
 type AnalysisRunRow = NonNullable<Awaited<ReturnType<AnalysisRunsRepository['findById']>>>;
-type AnalysisRunListRow = Awaited<ReturnType<AnalysisRunsRepository['findRecent']>>[number];
 
 @Injectable()
 export class AnalysisService {
@@ -30,6 +30,8 @@ export class AnalysisService {
     private readonly runs: AnalysisRunsRepository,
     @Inject(LlmService)
     private readonly llm: LlmService,
+    @Inject(RelevanceService)
+    private readonly relevance: RelevanceService,
     @InjectQueue(ANALYSIS_QUEUE)
     private readonly queue: Queue<AnalysisJob>,
   ) {}
@@ -44,8 +46,7 @@ export class AnalysisService {
     const article = await this.articles.findById(input.articleId);
     await Promise.all(input.competitorIds.map((id) => this.articles.findById(id)));
 
-    const texts = flattenFragments(article.sections).map((fragment) => fragment.text);
-    const scores = similaritiesToFirst(await this.llm.embed([input.query, ...texts]));
+    const scores = await this.relevance.score(input.query, article.sections);
     const run = await this.runs.create(input, scores);
     if (input.competitorIds.length > 0) {
       await this.queue.add('recommend', { runId: run.id }, { jobId: run.id, attempts: 1 });
@@ -59,7 +60,7 @@ export class AnalysisService {
       id: run.id,
       article: toArticleRef(run.article),
       query: run.query,
-      overallScore: average(run.scores),
+      overallScore: this.relevance.overall(run.scores),
       recommendations: run.recommendations,
       recommendationJob: run.competitors.length > 0 ? await this.findRecommendationJob(id) : null,
       createdAt: run.createdAt.toISOString(),
@@ -67,7 +68,7 @@ export class AnalysisService {
       audience: run.audience,
       purpose: run.purpose,
       niche: run.niche,
-      fragments: scoreFragments(run),
+      fragments: this.relevance.scoreFragments(run.article.sections, run.scores),
       missingEntities: run.missingEntities,
     };
   }
@@ -79,9 +80,16 @@ export class AnalysisService {
   async findRecent(): Promise<AnalysisRunSummary[]> {
     const runs = await this.runs.findRecent();
     return Promise.all(
-      runs.map(async (run) =>
-        toSummary(run, run._count.competitors > 0 ? await this.findRecommendationJob(run.id) : null),
-      ),
+      runs.map(async (run) => ({
+        id: run.id,
+        article: run.article,
+        query: run.query,
+        overallScore: this.relevance.overall(run.scores),
+        competitorCount: run._count.competitors,
+        recommendations: run.recommendations,
+        recommendationJob: run._count.competitors > 0 ? await this.findRecommendationJob(run.id) : null,
+        createdAt: run.createdAt.toISOString(),
+      })),
     );
   }
 
@@ -93,15 +101,7 @@ export class AnalysisService {
 
   async writeRecommendations(runId: string): Promise<void> {
     const run = await this.requireRun(runId);
-    const prompt = buildRecommendationPrompt({
-      query: run.query,
-      audience: run.audience,
-      purpose: run.purpose,
-      niche: run.niche,
-      articleTitle: run.article.title,
-      fragments: scoreFragments(run),
-      competitors: run.competitors,
-    });
+    const prompt = renderRecommendationPrompt(run, this.relevance.scoreFragments(run.article.sections, run.scores));
     await this.runs.saveRecommendation(
       runId,
       await this.llm.completeStructured('recommendation', prompt, recommendationSchema),
@@ -121,27 +121,31 @@ export class AnalysisService {
   }
 }
 
-function scoreFragments(run: AnalysisRunRow): FragmentScore[] {
-  return flattenFragments(run.article.sections).map((fragment, index) => ({ ...fragment, score: run.scores[index]! }));
-}
-
 function toArticleRef({ id, sourceUrl, title }: { id: string; sourceUrl: string; title: string }) {
   return { id, sourceUrl, title };
 }
 
-function average(scores: number[]): number {
-  return scores.reduce((sum, score) => sum + score, 0) / scores.length;
-}
-
-function toSummary(run: AnalysisRunListRow, recommendationJob: RecommendationJob | null): AnalysisRunSummary {
-  return {
-    id: run.id,
-    article: run.article,
+function renderRecommendationPrompt(run: AnalysisRunRow, fragments: FragmentScore[]): string {
+  const values: Record<string, string> = {
     query: run.query,
-    overallScore: average(run.scores),
-    competitorCount: run._count.competitors,
-    recommendations: run.recommendations,
-    recommendationJob,
-    createdAt: run.createdAt.toISOString(),
+    audience: run.audience || 'not specified',
+    purpose: run.purpose || 'not specified',
+    niche: run.niche || 'not specified',
+    articleTitle: run.article.title,
+    fragments: fragments
+      .map(
+        (fragment) =>
+          `- [${fragment.score.toFixed(2)}] ${fragment.heading ? `${fragment.heading}: ` : ''}${fragment.text}`,
+      )
+      .join('\n'),
+    competitors: run.competitors
+      .map((competitor) => {
+        const lines = competitor.sections
+          .map((section) => `${section.heading ? `${section.heading}: ` : ''}${section.paragraphs.join(' ')}`)
+          .join('\n');
+        return `### ${competitor.title}\n${lines}`;
+      })
+      .join('\n\n'),
   };
+  return recommendationPrompt.replace(/\{\{(\w+)\}\}/g, (_, key: string) => values[key]!);
 }

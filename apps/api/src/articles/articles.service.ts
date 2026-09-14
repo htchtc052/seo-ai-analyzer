@@ -3,7 +3,6 @@ import type { Article } from '@seo-ai-analyzer/contracts';
 import { WebPageService } from '../web-page/web-page.service.js';
 import { ArticleImportException } from './article-import.exception.js';
 import { ArticlesRepository, type StoredArticle } from './articles.repository.js';
-import { extractArticle } from './lib/html-sections.js';
 
 const MIN_TEXT_LENGTH = 500;
 
@@ -17,7 +16,7 @@ export class ArticlesService {
   ) {}
 
   async import(url: string): Promise<Article> {
-    const extracted = extractArticle(await this.webPages.fetchHtml(url));
+    const extracted = await this.webPages.readArticle(url);
     if (!extracted) throw new ArticleImportException('Could not find article text on the page');
 
     const textLength = extracted.sections.flatMap((section) => section.paragraphs).join(' ').length;

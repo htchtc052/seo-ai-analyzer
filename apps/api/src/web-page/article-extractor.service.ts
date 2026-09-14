@@ -1,4 +1,5 @@
 import { Readability } from '@mozilla/readability';
+import { Injectable } from '@nestjs/common';
 import type { ArticleSection } from '@seo-ai-analyzer/contracts';
 import { parseHTML } from 'linkedom';
 
@@ -7,12 +8,15 @@ const MIN_PARAGRAPH_LENGTH = 40;
 
 export type ExtractedArticle = { title: string; sections: ArticleSection[] };
 
-export function extractArticle(html: string): ExtractedArticle | null {
-  const { document } = parseHTML(html);
-  if (!document.documentElement) return null;
-  const parsed = new Readability(document).parse();
-  if (!parsed?.content) return null;
-  return { title: normalize(parsed.title ?? ''), sections: toSections(parsed.content) };
+@Injectable()
+export class ArticleExtractorService {
+  extract(html: string): ExtractedArticle | null {
+    const { document } = parseHTML(html);
+    if (!document.documentElement) return null;
+    const parsed = new Readability(document).parse();
+    if (!parsed?.content) return null;
+    return { title: normalize(parsed.title ?? ''), sections: toSections(parsed.content) };
+  }
 }
 
 function toSections(html: string): ArticleSection[] {

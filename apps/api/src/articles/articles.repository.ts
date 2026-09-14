@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { ArticleSection } from '@seo-ai-analyzer/contracts';
 import type { Article as ArticleRow } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
-import type { ExtractedArticle } from './lib/html-sections.js';
+import type { ExtractedArticle } from '../web-page/article-extractor.service.js';
 
 export type StoredArticle = Omit<ArticleRow, 'sections'> & { sections: ArticleSection[] };
 
