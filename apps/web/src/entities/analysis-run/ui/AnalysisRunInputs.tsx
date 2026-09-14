@@ -1,4 +1,4 @@
-import type { AnalysisRun } from '@seo-ai-analyzer/contracts';
+import type { AnalysisRun } from '../model/analysis-run';
 import { ExternalLink } from '@/shared/ui/external-link';
 
 export function AnalysisRunInputs({ run }: { run: AnalysisRun }) {

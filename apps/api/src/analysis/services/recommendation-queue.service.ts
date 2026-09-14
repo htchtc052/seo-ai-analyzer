@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
-import type { RecommendationJob } from '@seo-ai-analyzer/contracts';
-import { ANALYSIS_QUEUE, type AnalysisJob } from './constants/analysis.constants.js';
+import type { RecommendationJob } from '../dto/analysis-run.dto.js';
+import { ANALYSIS_QUEUE, type AnalysisJob } from '../constants/analysis.constants.js';
 
 @Injectable()
 export class RecommendationQueueService {

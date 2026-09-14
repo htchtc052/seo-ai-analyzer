@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { Article } from '@seo-ai-analyzer/contracts';
-import { WebPageService } from '../web-page/web-page.service.js';
-import { ArticleImportException } from './article-import.exception.js';
-import { ArticlesRepository, type StoredArticle } from './articles.repository.js';
+import type { Article } from '../dto/article.dto.js';
+import { WebPageService } from '../../web-page/services/web-page.service.js';
+import { ArticleImportException } from '../exceptions/article-import.exception.js';
+import { ArticlesRepository, type StoredArticle } from '../repositories/articles.repository.js';
 
 const MIN_TEXT_LENGTH = 500;
 

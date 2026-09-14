@@ -2,7 +2,7 @@ import { Inject, Injectable, type CallHandler, type ExecutionContext, type NestI
 import { Reflector } from '@nestjs/core';
 import { map, type Observable } from 'rxjs';
 import type { ZodType } from 'zod';
-import { RESPONSE_SCHEMA } from './response-schema.decorator.js';
+import { RESPONSE_SCHEMA } from '../decorators/response-schema.decorator.js';
 
 @Injectable()
 export class ZodSerializerInterceptor implements NestInterceptor {

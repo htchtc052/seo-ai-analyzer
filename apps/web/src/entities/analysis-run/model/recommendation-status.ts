@@ -1,8 +1,8 @@
-import type { AnalysisRunSummary, RecommendationJob } from '@seo-ai-analyzer/contracts';
+import type { AnalysisRunSummary, RecommendationJobState } from './analysis-run';
 
 export type RecommendationStatus = 'scores-only' | 'pending' | 'ready' | 'failed';
 
-const pendingStates: RecommendationJob['state'][] = ['waiting', 'waiting-children', 'prioritized', 'delayed', 'active'];
+const pendingStates: RecommendationJobState[] = ['waiting', 'waiting-children', 'prioritized', 'delayed', 'active'];
 
 export function getRecommendationStatus(
   competitorCount: number,

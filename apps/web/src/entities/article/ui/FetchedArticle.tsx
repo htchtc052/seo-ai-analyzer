@@ -1,4 +1,4 @@
-import type { Article } from '@seo-ai-analyzer/contracts';
+import type { Article } from '../model/article';
 import { ChevronDown } from 'lucide-react';
 import { Badge } from '@/shared/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible';

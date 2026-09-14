@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { analysisRunListSchema } from '@seo-ai-analyzer/contracts';
+import { analysisRunListSchema } from './analysis/dto/analysis-run.dto.js';
 import { createApplication } from './bootstrap.js';
 
 test('article import and analysis boundaries', async () => {

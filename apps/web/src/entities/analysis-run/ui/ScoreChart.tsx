@@ -1,4 +1,4 @@
-import type { FragmentScore } from '@seo-ai-analyzer/contracts';
+import type { FragmentScore } from '../model/analysis-run';
 import { Progress } from '@/shared/ui/progress';
 import { groupBySection } from '../model/scored-sections';
 

@@ -3,10 +3,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
-import { analysisRequestSchema, type Article, type Features } from '@seo-ai-analyzer/contracts';
 import topics from '@seo-ai-analyzer/examples/topics.json';
 import { analysisRunKeys } from '@/entities/analysis-run';
-import { getFeatures, importArticle, startAnalysis } from '../api/start-analysis.api';
+import type { Article } from '@/entities/article';
+import { getFeatures, importArticle, startAnalysis, type Features } from '../api/start-analysis.api';
+import { startAnalysisSchema } from '../contract/start-analysis.contract';
 
 export type Topic = (typeof topics)[number];
 
@@ -45,7 +46,7 @@ export function useNewAnalysis() {
   const [main, setMain] = useState<ArticleSlot>(emptySlot(''));
   const [competitors, setCompetitors] = useState<ArticleSlot[]>(topics[0]!.competitors.map(() => emptySlot('')));
   const form = useForm({
-    resolver: zodResolver(analysisRequestSchema),
+    resolver: zodResolver(startAnalysisSchema),
     mode: 'onTouched',
     defaultValues: { articleId: '', query: '', competitorIds: [], audience: '', purpose: '', niche: '' },
   });

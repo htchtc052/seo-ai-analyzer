@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { ArticleSection } from '@seo-ai-analyzer/contracts';
+import type { ArticleSection } from '../dto/article.dto.js';
 import type { Article as ArticleRow } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service.js';
-import type { ExtractedArticle } from '../web-page/article-extractor.service.js';
+import { PrismaService } from '../../prisma/services/prisma.service.js';
+import type { ExtractedArticle } from '../../web-page/services/article-extractor.service.js';
 
 export type StoredArticle = Omit<ArticleRow, 'sections'> & { sections: ArticleSection[] };
 

@@ -1,20 +1,20 @@
 import { readFileSync } from 'node:fs';
 import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import {
-  recommendationSchema,
-  type AnalysisRequest,
-  type AnalysisRun,
-  type AnalysisRunSummary,
-  type Features,
-  type FragmentScore,
-} from '@seo-ai-analyzer/contracts';
-import { ArticlesService } from '../articles/articles.service.js';
-import { LlmService } from '../llm/llm.service.js';
-import { AnalysisRunsRepository } from './analysis-runs.repository.js';
+import type {
+  AnalysisRun,
+  AnalysisRunSummary,
+  Features,
+  FragmentScore,
+  StartAnalysisDto,
+} from '../dto/analysis-run.dto.js';
+import { recommendationSchema } from '../dto/recommendation.dto.js';
+import { ArticlesService } from '../../articles/services/articles.service.js';
+import { LlmService } from '../../llm/services/llm.service.js';
+import { AnalysisRunsRepository } from '../repositories/analysis-runs.repository.js';
 import { RecommendationQueueService } from './recommendation-queue.service.js';
 import { RelevanceService } from './relevance.service.js';
 
-const recommendationPrompt = readFileSync(new URL('./prompts/recommendation.md', import.meta.url), 'utf8');
+const recommendationPrompt = readFileSync(new URL('../prompts/recommendation.md', import.meta.url), 'utf8');
 
 type AnalysisRunRow = NonNullable<Awaited<ReturnType<AnalysisRunsRepository['findById']>>>;
 
@@ -33,7 +33,7 @@ export class AnalysisService {
     private readonly recommendationQueue: RecommendationQueueService,
   ) {}
 
-  async startAnalysis(input: AnalysisRequest): Promise<AnalysisRun> {
+  async startAnalysis(input: StartAnalysisDto): Promise<AnalysisRun> {
     if (input.competitorIds.length > 0 && this.llm.chatModel === undefined) {
       throw new UnprocessableEntityException({
         code: 'RECOMMENDATIONS_DISABLED',

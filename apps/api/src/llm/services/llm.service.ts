@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { z, type ZodType } from 'zod';
-import type { AppConfig } from '../config/config.schema.js';
+import type { AppConfig } from '../../config/config.schema.js';
 
 @Injectable()
 export class LlmService {

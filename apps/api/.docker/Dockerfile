@@ -4,14 +4,12 @@ WORKDIR /app
 COPY package.json package-lock.json tsconfig.base.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
-COPY packages/contracts/package.json packages/contracts/
 COPY packages/examples/package.json packages/examples/
 
 FROM base AS build
 RUN npm ci --no-audit --no-fund
-COPY packages/contracts packages/contracts
 COPY apps/api apps/api
-RUN npm run build -w @seo-ai-analyzer/contracts && npm run build -w @seo-ai-analyzer/api
+RUN npm run build -w @seo-ai-analyzer/api
 
 FROM base
 ENV NODE_ENV=production
@@ -19,7 +17,6 @@ COPY apps/api/prisma apps/api/prisma
 RUN npm ci --omit=dev --omit=optional -w @seo-ai-analyzer/api --no-audit --no-fund \
   && npm exec -w @seo-ai-analyzer/api -- prisma generate \
   && rm -rf /root/.npm /root/.cache
-COPY --from=build /app/packages/contracts/dist packages/contracts/dist
 COPY --from=build /app/apps/api/dist apps/api/dist
 WORKDIR /app/apps/api
 USER node

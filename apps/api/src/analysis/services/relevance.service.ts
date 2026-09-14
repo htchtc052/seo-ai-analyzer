@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { ArticleSection, FragmentScore } from '@seo-ai-analyzer/contracts';
-import { LlmService } from '../llm/llm.service.js';
+import type { ArticleSection } from '../../articles/dto/article.dto.js';
+import type { FragmentScore } from '../dto/analysis-run.dto.js';
+import { LlmService } from '../../llm/services/llm.service.js';
 
 @Injectable()
 export class RelevanceService {

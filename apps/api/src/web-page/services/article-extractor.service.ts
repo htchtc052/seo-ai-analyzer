@@ -1,12 +1,13 @@
 import { Readability } from '@mozilla/readability';
 import { Injectable } from '@nestjs/common';
-import type { ArticleSection } from '@seo-ai-analyzer/contracts';
 import { parseHTML } from 'linkedom';
 
 const TEXT_BLOCKS = 'h2, h3, p, li, blockquote, pre, div';
 const MIN_PARAGRAPH_LENGTH = 40;
 
-export type ExtractedArticle = { title: string; sections: ArticleSection[] };
+type ExtractedSection = { heading: string | null; paragraphs: string[] };
+
+export type ExtractedArticle = { title: string; sections: ExtractedSection[] };
 
 @Injectable()
 export class ArticleExtractorService {
@@ -19,10 +20,10 @@ export class ArticleExtractorService {
   }
 }
 
-function toSections(html: string): ArticleSection[] {
+function toSections(html: string): ExtractedSection[] {
   const { document } = parseHTML(`<!doctype html><html><body>${html}</body></html>`);
-  const sections: ArticleSection[] = [];
-  let current: ArticleSection | undefined;
+  const sections: ExtractedSection[] = [];
+  let current: ExtractedSection | undefined;
 
   for (const node of document.querySelectorAll(TEXT_BLOCKS)) {
     if (node.querySelector(TEXT_BLOCKS)) continue;

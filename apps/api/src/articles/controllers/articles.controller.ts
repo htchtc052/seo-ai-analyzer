@@ -1,12 +1,8 @@
 import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
-import {
-  articleImportRequestSchema,
-  articleResponseSchema,
-  type ArticleImportRequest,
-} from '@seo-ai-analyzer/contracts';
-import { ResponseSchema } from '../common/response-schema.decorator.js';
-import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
-import { ArticlesService } from './articles.service.js';
+import { articleResponseSchema, importArticleSchema, type ImportArticleDto } from '../dto/article.dto.js';
+import { ResponseSchema } from '../../common/decorators/response-schema.decorator.js';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
+import { ArticlesService } from '../services/articles.service.js';
 
 @Controller('articles')
 export class ArticlesController {
@@ -17,7 +13,7 @@ export class ArticlesController {
 
   @Post('import')
   @ResponseSchema(articleResponseSchema)
-  async import(@Body(new ZodValidationPipe(articleImportRequestSchema)) input: ArticleImportRequest) {
+  async import(@Body(new ZodValidationPipe(importArticleSchema)) input: ImportArticleDto) {
     return { article: await this.articles.importArticle(input.url) };
   }
 

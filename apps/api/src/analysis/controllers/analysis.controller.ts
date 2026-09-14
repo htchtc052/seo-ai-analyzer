@@ -1,14 +1,14 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Post } from '@nestjs/common';
 import {
-  analysisRequestSchema,
   analysisRunListSchema,
   analysisRunResponseSchema,
   featuresResponseSchema,
-  type AnalysisRequest,
-} from '@seo-ai-analyzer/contracts';
-import { ResponseSchema } from '../common/response-schema.decorator.js';
-import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
-import { AnalysisService } from './analysis.service.js';
+  startAnalysisSchema,
+  type StartAnalysisDto,
+} from '../dto/analysis-run.dto.js';
+import { ResponseSchema } from '../../common/decorators/response-schema.decorator.js';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
+import { AnalysisService } from '../services/analysis.service.js';
 
 @Controller('analyses')
 export class AnalysisController {
@@ -19,7 +19,7 @@ export class AnalysisController {
 
   @Post()
   @ResponseSchema(analysisRunResponseSchema)
-  async start(@Body(new ZodValidationPipe(analysisRequestSchema)) input: AnalysisRequest) {
+  async start(@Body(new ZodValidationPipe(startAnalysisSchema)) input: StartAnalysisDto) {
     return { run: await this.analysis.startAnalysis(input) };
   }
 

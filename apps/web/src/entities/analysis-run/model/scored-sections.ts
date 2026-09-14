@@ -1,4 +1,4 @@
-import type { FragmentScore } from '@seo-ai-analyzer/contracts';
+import type { FragmentScore } from './analysis-run';
 
 export type ScoredSection = { heading: string | null; fragments: FragmentScore[] };
 

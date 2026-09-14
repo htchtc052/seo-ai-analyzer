@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { AnalysisRequest, Recommendation } from '@seo-ai-analyzer/contracts';
-import { toStoredArticle } from '../articles/articles.repository.js';
-import { PrismaService } from '../prisma/prisma.service.js';
+import type { StartAnalysisDto } from '../dto/analysis-run.dto.js';
+import type { Recommendation } from '../dto/recommendation.dto.js';
+import { toStoredArticle } from '../../articles/repositories/articles.repository.js';
+import { PrismaService } from '../../prisma/services/prisma.service.js';
 
 const articleRef = { select: { id: true, sourceUrl: true, title: true } };
 
@@ -12,7 +13,7 @@ export class AnalysisRunsRepository {
     private readonly prisma: PrismaService,
   ) {}
 
-  create({ competitorIds, ...input }: AnalysisRequest, scores: number[]) {
+  create({ competitorIds, ...input }: StartAnalysisDto, scores: number[]) {
     return this.prisma.analysisRun.create({
       data: { ...input, scores, competitors: { connect: competitorIds.map((id) => ({ id })) } },
     });

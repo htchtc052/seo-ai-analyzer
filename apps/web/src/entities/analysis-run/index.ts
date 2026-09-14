@@ -1,3 +1,4 @@
+export type { AnalysisRun, AnalysisRunSummary, FragmentScore } from './model/analysis-run';
 export { analysisRunKeys } from './model/query-keys';
 export { useAnalysisRun } from './model/useAnalysisRun';
 export { useAnalysisRuns } from './model/useAnalysisRuns';
