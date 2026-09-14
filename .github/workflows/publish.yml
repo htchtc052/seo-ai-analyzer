@@ -21,20 +21,20 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_DB: semantic
-          POSTGRES_USER: semantic
-          POSTGRES_PASSWORD: semantic
+          POSTGRES_DB: seo_ai_analyzer
+          POSTGRES_USER: seo_ai_analyzer
+          POSTGRES_PASSWORD: seo_ai_analyzer
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U semantic -d semantic"
+          --health-cmd "pg_isready -U seo_ai_analyzer -d seo_ai_analyzer"
           --health-interval 5s --health-timeout 3s --health-retries 10
       redis:
         image: redis:8-alpine
         ports:
           - 6379:6379
     env:
-      DATABASE_URL: postgresql://semantic:semantic@localhost:5432/semantic?schema=public
+      DATABASE_URL: postgresql://seo_ai_analyzer:seo_ai_analyzer@localhost:5432/seo_ai_analyzer?schema=public
       REDIS_URL: redis://localhost:6379
       LLM_BASE_URL: http://127.0.0.1:11434/v1
       LLM_API_KEY: test

@@ -15,7 +15,7 @@
     "build": "npm run build -w @seo-ai-analyzer/contracts && npm run build -w @seo-ai-analyzer/api && npm run build -w @seo-ai-analyzer/web",
     "typecheck": "npm run build -w @seo-ai-analyzer/contracts && npm run typecheck --workspaces --if-present",
     "test": "npm run build -w @seo-ai-analyzer/contracts && npm run test --workspaces --if-present",
-    "format": "prettier --write apps/api/src apps/web/src packages/contracts/src"
+    "format": "prettier --write apps/api/src apps/api/scripts apps/web/src packages/contracts/src"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

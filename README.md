@@ -29,4 +29,4 @@ npm run build
 
 `npm test` ходит в Postgres и Redis из `docker-compose.dev.yml`; модели и интернет не нужны.
 
-`npm run smoke:import -w @seo-ai-analyzer/api` прогоняет импорт реальных страниц через запущенный API. Результат зависит от доступности сайтов.
+`npm run smoke:import -w @seo-ai-analyzer/api` (скрипт `apps/api/scripts/import-smoke.ts`) прогоняет импорт реальных страниц через запущенный API. Результат зависит от доступности сайтов.

@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { AnalysisRequest, Recommendation } from '@seo-ai-analyzer/contracts';
+import { toStoredArticle } from '../articles/articles.repository.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 const articleRef = { select: { id: true, sourceUrl: true, title: true } };
@@ -17,11 +18,12 @@ export class AnalysisRunsRepository {
     });
   }
 
-  findById(id: string) {
-    return this.prisma.analysisRun.findUnique({
+  async findById(id: string) {
+    const run = await this.prisma.analysisRun.findUnique({
       where: { id },
       include: { article: true, competitors: true },
     });
+    return run && { ...run, article: toStoredArticle(run.article), competitors: run.competitors.map(toStoredArticle) };
   }
 
   findRecent() {

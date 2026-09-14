@@ -4,7 +4,6 @@ import { analysisRunListSchema } from '@seo-ai-analyzer/contracts';
 import { createApplication } from './bootstrap.js';
 
 test('article import and analysis boundaries', async () => {
-  process.env.NODE_ENV = 'test';
   const app = await createApplication();
   await app.listen(0, '127.0.0.1');
   const address = app.getHttpServer().address();

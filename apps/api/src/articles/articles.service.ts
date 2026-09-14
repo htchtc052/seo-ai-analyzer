@@ -1,13 +1,11 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { Article, ArticleSection } from '@seo-ai-analyzer/contracts';
+import type { Article } from '@seo-ai-analyzer/contracts';
 import { WebPageService } from '../web-page/web-page.service.js';
-import { importFailed } from './lib/article-import-failed.js';
-import { ArticlesRepository } from './articles.repository.js';
+import { ArticleImportException } from './article-import.exception.js';
+import { ArticlesRepository, type StoredArticle } from './articles.repository.js';
 import { extractArticle } from './lib/html-sections.js';
 
 const MIN_TEXT_LENGTH = 500;
-
-type ArticleRow = NonNullable<Awaited<ReturnType<ArticlesRepository['findById']>>>;
 
 @Injectable()
 export class ArticlesService {
@@ -19,34 +17,27 @@ export class ArticlesService {
   ) {}
 
   async import(url: string): Promise<Article> {
-    const html = await this.webPages.fetchHtml(url);
-    const extracted = extractArticle(html);
-    if (!extracted) importFailed('Could not find article text on the page');
+    const extracted = extractArticle(await this.webPages.fetchHtml(url));
+    if (!extracted) throw new ArticleImportException('Could not find article text on the page');
 
     const textLength = extracted.sections.flatMap((section) => section.paragraphs).join(' ').length;
     if (textLength < MIN_TEXT_LENGTH) {
-      importFailed(`Found only ${textLength} characters of article text, at least ${MIN_TEXT_LENGTH} are needed`);
+      throw new ArticleImportException(
+        `Found only ${textLength} characters of article text, at least ${MIN_TEXT_LENGTH} are needed`,
+      );
     }
-    if (!extracted.title) importFailed('The page has no title');
+    if (!extracted.title) throw new ArticleImportException('The page has no title');
 
     return toArticle(await this.articles.create({ sourceUrl: url, ...extracted }));
   }
 
   async findById(id: string): Promise<Article> {
     const article = await this.articles.findById(id);
-    if (!article) {
-      throw new NotFoundException({ code: 'ARTICLE_NOT_FOUND', message: 'Article not found' });
-    }
+    if (!article) throw new NotFoundException({ code: 'ARTICLE_NOT_FOUND', message: 'Article not found' });
     return toArticle(article);
   }
 }
 
-function toArticle(row: ArticleRow): Article {
-  return {
-    id: row.id,
-    sourceUrl: row.sourceUrl,
-    title: row.title,
-    sections: row.sections as ArticleSection[],
-    importedAt: row.importedAt.toISOString(),
-  };
+function toArticle(article: StoredArticle): Article {
+  return { ...article, importedAt: article.importedAt.toISOString() };
 }

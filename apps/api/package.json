@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test src/app.test.ts",
     "db:migrate": "prisma migrate dev",
-    "smoke:import": "tsx src/import.smoke.ts"
+    "smoke:import": "tsx scripts/import-smoke.ts"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",

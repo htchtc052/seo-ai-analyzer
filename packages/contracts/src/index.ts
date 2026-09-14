@@ -84,7 +84,6 @@ export const apiErrorSchema = z.object({
 });
 
 export type Article = z.infer<typeof articleSchema>;
-export type ArticleRef = z.infer<typeof articleRefSchema>;
 export type ArticleSection = z.infer<typeof articleSectionSchema>;
 export type ArticleImportRequest = z.infer<typeof articleImportRequestSchema>;
 export type AnalysisRequest = z.infer<typeof analysisRequestSchema>;

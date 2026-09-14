@@ -1,21 +1,22 @@
 import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
-import type {
-  AnalysisRequest,
-  AnalysisRun,
-  AnalysisRunSummary,
-  ArticleSection,
-  Features,
-  FragmentScore,
-  RecommendationJob,
+import {
+  recommendationSchema,
+  type AnalysisRequest,
+  type AnalysisRun,
+  type AnalysisRunSummary,
+  type Features,
+  type FragmentScore,
+  type RecommendationJob,
 } from '@seo-ai-analyzer/contracts';
 import { ArticlesService } from '../articles/articles.service.js';
-import { ANALYSIS_QUEUE, type AnalysisJob } from './lib/analysis-queue.js';
+import { LlmService } from '../llm/llm.service.js';
 import { AnalysisRunsRepository } from './analysis-runs.repository.js';
+import { ANALYSIS_QUEUE, type AnalysisJob } from './lib/analysis-queue.js';
+import { similaritiesToFirst } from './lib/cosine-similarity.js';
 import { flattenFragments } from './lib/fragments.js';
-import { RecommendationService } from './recommendation.service.js';
-import { RelevanceService } from './relevance.service.js';
+import { buildRecommendationPrompt } from './lib/recommendation-prompt.js';
 
 type AnalysisRunRow = NonNullable<Awaited<ReturnType<AnalysisRunsRepository['findById']>>>;
 type AnalysisRunListRow = Awaited<ReturnType<AnalysisRunsRepository['findRecent']>>[number];
@@ -27,16 +28,14 @@ export class AnalysisService {
     private readonly articles: ArticlesService,
     @Inject(AnalysisRunsRepository)
     private readonly runs: AnalysisRunsRepository,
-    @Inject(RelevanceService)
-    private readonly relevance: RelevanceService,
-    @Inject(RecommendationService)
-    private readonly recommendations: RecommendationService,
+    @Inject(LlmService)
+    private readonly llm: LlmService,
     @InjectQueue(ANALYSIS_QUEUE)
     private readonly queue: Queue<AnalysisJob>,
   ) {}
 
   async start(input: AnalysisRequest): Promise<AnalysisRun> {
-    if (input.competitorIds.length > 0 && !this.recommendations.enabled) {
+    if (input.competitorIds.length > 0 && this.llm.chatModel === undefined) {
       throw new UnprocessableEntityException({
         code: 'RECOMMENDATIONS_DISABLED',
         message: 'Recommendations are disabled on this server, so competitors cannot be added',
@@ -45,11 +44,8 @@ export class AnalysisService {
     const article = await this.articles.findById(input.articleId);
     await Promise.all(input.competitorIds.map((id) => this.articles.findById(id)));
 
-    const fragments = flattenFragments(article.sections);
-    const scores = await this.relevance.score(
-      input.query,
-      fragments.map((fragment) => fragment.text),
-    );
+    const texts = flattenFragments(article.sections).map((fragment) => fragment.text);
+    const scores = similaritiesToFirst(await this.llm.embed([input.query, ...texts]));
     const run = await this.runs.create(input, scores);
     if (input.competitorIds.length > 0) {
       await this.queue.add('recommend', { runId: run.id }, { jobId: run.id, attempts: 1 });
@@ -65,6 +61,7 @@ export class AnalysisService {
       query: run.query,
       overallScore: average(run.scores),
       recommendations: run.recommendations,
+      recommendationJob: run.competitors.length > 0 ? await this.findRecommendationJob(id) : null,
       createdAt: run.createdAt.toISOString(),
       competitors: run.competitors.map(toArticleRef),
       audience: run.audience,
@@ -72,12 +69,11 @@ export class AnalysisService {
       niche: run.niche,
       fragments: scoreFragments(run),
       missingEntities: run.missingEntities,
-      recommendationJob: run.competitors.length > 0 ? await this.findRecommendationJob(id) : null,
     };
   }
 
   features(): Features {
-    return { recommendations: this.recommendations.enabled };
+    return { recommendations: this.llm.chatModel !== undefined };
   }
 
   async findRecent(): Promise<AnalysisRunSummary[]> {
@@ -97,26 +93,24 @@ export class AnalysisService {
 
   async writeRecommendations(runId: string): Promise<void> {
     const run = await this.requireRun(runId);
-    const recommendation = await this.recommendations.recommend({
+    const prompt = buildRecommendationPrompt({
       query: run.query,
       audience: run.audience,
       purpose: run.purpose,
       niche: run.niche,
       articleTitle: run.article.title,
       fragments: scoreFragments(run),
-      competitors: run.competitors.map((competitor) => ({
-        title: competitor.title,
-        sections: competitor.sections as ArticleSection[],
-      })),
+      competitors: run.competitors,
     });
-    await this.runs.saveRecommendation(runId, recommendation);
+    await this.runs.saveRecommendation(
+      runId,
+      await this.llm.completeStructured('recommendation', prompt, recommendationSchema),
+    );
   }
 
   private async requireRun(id: string): Promise<AnalysisRunRow> {
     const run = await this.runs.findById(id);
-    if (!run) {
-      throw new NotFoundException({ code: 'ANALYSIS_RUN_NOT_FOUND', message: 'Analysis run not found' });
-    }
+    if (!run) throw new NotFoundException({ code: 'ANALYSIS_RUN_NOT_FOUND', message: 'Analysis run not found' });
     return run;
   }
 
@@ -128,14 +122,11 @@ export class AnalysisService {
 }
 
 function scoreFragments(run: AnalysisRunRow): FragmentScore[] {
-  return flattenFragments(run.article.sections as ArticleSection[]).map((fragment, index) => ({
-    ...fragment,
-    score: run.scores[index]!,
-  }));
+  return flattenFragments(run.article.sections).map((fragment, index) => ({ ...fragment, score: run.scores[index]! }));
 }
 
-function toArticleRef(article: { id: string; sourceUrl: string; title: string }) {
-  return { id: article.id, sourceUrl: article.sourceUrl, title: article.title };
+function toArticleRef({ id, sourceUrl, title }: { id: string; sourceUrl: string; title: string }) {
+  return { id, sourceUrl, title };
 }
 
 function average(scores: number[]): number {

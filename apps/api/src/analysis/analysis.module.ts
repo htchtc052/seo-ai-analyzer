@@ -8,12 +8,10 @@ import { AnalysisRunsRepository } from './analysis-runs.repository.js';
 import { AnalysisController } from './analysis.controller.js';
 import { AnalysisProcessor } from './analysis.processor.js';
 import { AnalysisService } from './analysis.service.js';
-import { RecommendationService } from './recommendation.service.js';
-import { RelevanceService } from './relevance.service.js';
 
 @Module({
   imports: [ArticlesModule, LlmModule, PrismaModule, BullModule.registerQueue({ name: ANALYSIS_QUEUE })],
   controllers: [AnalysisController],
-  providers: [AnalysisService, AnalysisRunsRepository, AnalysisProcessor, RelevanceService, RecommendationService],
+  providers: [AnalysisService, AnalysisRunsRepository, AnalysisProcessor],
 })
 export class AnalysisModule {}

@@ -1,6 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { ArticleSection } from '@seo-ai-analyzer/contracts';
+import type { Article as ArticleRow } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
+import type { ExtractedArticle } from './lib/html-sections.js';
+
+export type StoredArticle = Omit<ArticleRow, 'sections'> & { sections: ArticleSection[] };
+
+export function toStoredArticle(row: ArticleRow): StoredArticle {
+  return { ...row, sections: row.sections as ArticleSection[] };
+}
 
 @Injectable()
 export class ArticlesRepository {
@@ -9,11 +17,12 @@ export class ArticlesRepository {
     private readonly prisma: PrismaService,
   ) {}
 
-  create(data: { sourceUrl: string; title: string; sections: ArticleSection[] }) {
-    return this.prisma.article.create({ data });
+  async create(data: ExtractedArticle & { sourceUrl: string }): Promise<StoredArticle> {
+    return toStoredArticle(await this.prisma.article.create({ data }));
   }
 
-  findById(id: string) {
-    return this.prisma.article.findUnique({ where: { id } });
+  async findById(id: string): Promise<StoredArticle | null> {
+    const row = await this.prisma.article.findUnique({ where: { id } });
+    return row && toStoredArticle(row);
   }
 }

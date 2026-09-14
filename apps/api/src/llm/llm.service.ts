@@ -9,7 +9,7 @@ export class LlmService {
   private readonly logger = new Logger(LlmService.name);
   private readonly client: OpenAI;
   private readonly embeddingModel: string;
-  private readonly chatModel: string | undefined;
+  readonly chatModel: string | undefined;
 
   constructor(
     @Inject(ConfigService)
@@ -21,10 +21,6 @@ export class LlmService {
     });
     this.embeddingModel = config.get('LLM_EMBEDDING_MODEL', { infer: true });
     this.chatModel = config.get('LLM_CHAT_MODEL', { infer: true });
-  }
-
-  get chatEnabled(): boolean {
-    return this.chatModel !== undefined;
   }
 
   async embed(texts: string[]): Promise<number[][]> {

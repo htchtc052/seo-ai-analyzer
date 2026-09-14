@@ -9,3 +9,7 @@ export function cosineSimilarity(a: number[], b: number[]): number {
   }
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
+
+export function similaritiesToFirst([first, ...rest]: number[][]): number[] {
+  return rest.map((embedding) => cosineSimilarity(first!, embedding));
+}
