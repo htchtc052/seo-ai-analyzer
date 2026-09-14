@@ -1,14 +1,13 @@
 import { Link } from 'react-router';
-import { DeleteRunButton } from '@/components/analysis/DeleteRunButton';
-import { RecommendationStatus } from '@/components/analysis/RecommendationStatus';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAnalysisRuns } from '@/hooks/useAnalysisRuns';
+import { RecommendationStatus, useAnalysisRuns } from '@/entities/analysis-run';
+import { DeleteRunButton } from '@/features/delete-analysis-run';
+import { Alert, AlertDescription } from '@/shared/ui/alert';
+import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
 
 export function AnalysisRunsPage() {
-  const { rows, error, deleteRun } = useAnalysisRuns();
+  const { data: rows, error } = useAnalysisRuns();
 
   return (
     <Card>
@@ -18,7 +17,7 @@ export function AnalysisRunsPage() {
       <CardContent>
         {error && (
           <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{error.message}</AlertDescription>
           </Alert>
         )}
         {!rows && !error && <p className="text-sm text-muted-foreground">Loading analyses…</p>}
@@ -57,9 +56,7 @@ export function AnalysisRunsPage() {
                     <RecommendationStatus status={status} />
                   </TableCell>
                   <TableCell className="text-right">
-                    {status !== 'pending' && (
-                      <DeleteRunButton title={run.article.title} onConfirm={() => deleteRun(run.id)} />
-                    )}
+                    {status !== 'pending' && <DeleteRunButton runId={run.id} title={run.article.title} />}
                   </TableCell>
                 </TableRow>
               ))}

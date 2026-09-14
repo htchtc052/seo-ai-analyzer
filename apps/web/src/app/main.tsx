@@ -1,10 +1,12 @@
 import React from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, NavLink, Outlet, Route, Routes } from 'react-router';
 import { AnalysisRunPage } from '@/pages/AnalysisRunPage';
 import { AnalysisRunsPage } from '@/pages/AnalysisRunsPage';
 import { NewAnalysisPage } from '@/pages/NewAnalysisPage';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/ui/button';
+import { queryClient } from './query-client';
 import './styles.css';
 
 function Layout() {
@@ -38,14 +40,16 @@ function NavItem({ to, end, children }: { to: string; end?: boolean; children: s
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<NewAnalysisPage />} />
-          <Route path="analyses" element={<AnalysisRunsPage />} />
-          <Route path="analyses/:id" element={<AnalysisRunPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<NewAnalysisPage />} />
+            <Route path="analyses" element={<AnalysisRunsPage />} />
+            <Route path="analyses/:id" element={<AnalysisRunPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   </React.StrictMode>,
 );

@@ -1,26 +1,24 @@
 import { Link, useParams } from 'react-router';
-import { AnalysisRunInputs } from '@/components/analysis/AnalysisRunInputs';
-import { RecommendationStatus } from '@/components/analysis/RecommendationStatus';
-import { ScoreChart } from '@/components/analysis/ScoreChart';
-import { TextList } from '@/components/analysis/TextList';
-import { ExternalLink } from '@/components/ui/external-link';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAnalysisRun } from '@/hooks/useAnalysisRun';
+import { AnalysisRunInputs, RecommendationStatus, ScoreChart, useAnalysisRun } from '@/entities/analysis-run';
+import { ExternalLink } from '@/shared/ui/external-link';
+import { TextList } from '@/shared/ui/text-list';
+import { Alert, AlertDescription } from '@/shared/ui/alert';
+import { Button } from '@/shared/ui/button';
+import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/ui/card';
 
 export function AnalysisRunPage() {
   const { id = '' } = useParams();
-  const { run, error, recommendationStatus, sections } = useAnalysisRun(id);
+  const { data, error } = useAnalysisRun(id);
 
   if (error)
     return (
       <Alert variant="destructive">
-        <AlertDescription>{error}</AlertDescription>
+        <AlertDescription>{error.message}</AlertDescription>
       </Alert>
     );
-  if (!run || !recommendationStatus || !sections)
-    return <p className="text-sm text-muted-foreground">Loading analysis…</p>;
+  if (!data) return <p className="text-sm text-muted-foreground">Loading analysis…</p>;
+
+  const { run, status: recommendationStatus } = data;
 
   return (
     <Card>
@@ -38,7 +36,7 @@ export function AnalysisRunPage() {
           <h3 className="font-semibold">
             Overall relevance: <span className="text-primary tabular-nums">{run.overallScore.toFixed(2)}</span>
           </h3>
-          <ScoreChart sections={sections} />
+          <ScoreChart fragments={run.fragments} />
         </section>
         {recommendationStatus === 'scores-only' && (
           <p className="text-sm text-muted-foreground">
