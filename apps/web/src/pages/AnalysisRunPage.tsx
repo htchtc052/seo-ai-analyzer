@@ -5,6 +5,7 @@ import { TextList } from '@/shared/ui/text-list';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Muted, SectionTitle } from '@/shared/ui/typography';
 
 export function AnalysisRunPage() {
   const { id = '' } = useParams();
@@ -16,7 +17,7 @@ export function AnalysisRunPage() {
         <AlertDescription>{error.message}</AlertDescription>
       </Alert>
     );
-  if (!data) return <p className="text-sm text-muted-foreground">Loading analysis…</p>;
+  if (!data) return <Muted>Loading analysis…</Muted>;
 
   const { run, status: recommendationStatus } = data;
 
@@ -33,15 +34,13 @@ export function AnalysisRunPage() {
       <CardContent className="grid gap-8">
         <AnalysisRunInputs run={run} />
         <section className="grid gap-4">
-          <h3 className="font-semibold">
+          <SectionTitle>
             Overall relevance: <span className="text-primary tabular-nums">{run.overallScore.toFixed(2)}</span>
-          </h3>
+          </SectionTitle>
           <ScoreChart fragments={run.fragments} />
         </section>
         {recommendationStatus === 'scores-only' && (
-          <p className="text-sm text-muted-foreground">
-            No competitors were added, so recommendations were not requested.
-          </p>
+          <Muted>No competitors were added, so recommendations were not requested.</Muted>
         )}
         {recommendationStatus === 'failed' && (
           <Alert variant="destructive">

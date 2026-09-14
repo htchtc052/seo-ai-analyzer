@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
+import { Muted } from '@/shared/ui/typography';
 
 export function AnalysisRunsPage() {
   const { data: rows, error } = useAnalysisRuns();
@@ -20,14 +21,14 @@ export function AnalysisRunsPage() {
             <AlertDescription>{error.message}</AlertDescription>
           </Alert>
         )}
-        {!rows && !error && <p className="text-sm text-muted-foreground">Loading analyses…</p>}
+        {!rows && !error && <Muted>Loading analyses…</Muted>}
         {rows?.length === 0 && (
-          <p className="text-sm text-muted-foreground">
+          <Muted>
             No analyses yet.{' '}
             <Button asChild variant="link" className="p-0">
               <Link to="/">Start one</Link>
             </Button>
-          </p>
+          </Muted>
         )}
         {rows && rows.length > 0 && (
           <Table>

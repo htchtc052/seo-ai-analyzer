@@ -7,6 +7,7 @@ import { Textarea } from '@/shared/ui/textarea';
 import { useNewAnalysis, type AnalysisHint } from '../model/useNewAnalysis';
 import { ArticleField } from './ArticleField';
 import { ExampleTopic } from './ExampleTopic';
+import { Muted } from '@/shared/ui/typography';
 
 const hints: Record<AnalysisHint, string> = {
   'recommendations-disabled':
@@ -49,7 +50,7 @@ export function NewAnalysisForm() {
         <AlertDescription>{featuresError.message}</AlertDescription>
       </Alert>
     ) : (
-      <p className="text-sm text-muted-foreground">Loading…</p>
+      <Muted>Loading…</Muted>
     );
   }
 

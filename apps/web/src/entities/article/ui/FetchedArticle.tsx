@@ -2,6 +2,7 @@ import type { Article } from '../model/article';
 import { ChevronDown } from 'lucide-react';
 import { Badge } from '@/shared/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible';
+import { Subheading } from '@/shared/ui/typography';
 
 export function FetchedArticle({ article }: { article: Article }) {
   const textLength = article.sections.flatMap((section) => section.paragraphs).join(' ').length;
@@ -16,7 +17,7 @@ export function FetchedArticle({ article }: { article: Article }) {
       <CollapsibleContent className="grid gap-3 px-4 pb-4 text-sm leading-relaxed">
         {article.sections.map((section, index) => (
           <section key={index} className="grid gap-2">
-            {section.heading && <h4 className="font-semibold">{section.heading}</h4>}
+            {section.heading && <Subheading>{section.heading}</Subheading>}
             {section.paragraphs.map((paragraph, pIndex) => (
               <p key={pIndex}>{paragraph}</p>
             ))}
